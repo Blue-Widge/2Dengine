@@ -1,8 +1,38 @@
 ﻿#include "SDLHandler.h"
 #include <iostream>
 
-SDLHandler* SDLHandler::instance = nullptr;
 
+void InputManager::checkInput()
+{
+    while(SDL_PollEvent(&m_event))
+    {
+        switch(m_event.type)
+        {
+        case SDL_QUIT:
+            m_isPlaying = false;
+            break;
+        case SDL_KEYDOWN:
+            break;
+        case SDL_KEYUP:
+            break;
+        default: ;
+        }
+    }
+}
+
+void Gameloop::updateDeltaTime()
+{
+    const Uint32 loopEndTime = SDL_GetTicks();
+    m_deltaTime = static_cast<float>(loopEndTime - m_loopBeginTime) / 1000.f;
+    m_loopBeginTime = loopEndTime;
+}
+
+void Gameloop::fixedUpdate()
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_fixedUpdateTime));
+}
+
+SDLHandler* SDLHandler::instance = nullptr;
 
 SDLHandler* SDLHandler::getHandlerInstance()
 {
@@ -57,37 +87,6 @@ bool SDLHandler::initSDL()
     return true;
 }
 
-void SDLHandler::fixedUpdate()
-{
-    // PHYSICS THINGS
-}
-
-void SDLHandler::updateDeltaTime()
-{
-    const Uint32 loopEndTime = SDL_GetTicks();
-    m_deltaTime = static_cast<float>(loopEndTime - m_loopBeginTime) / 1000.f;
-    m_loopBeginTime = loopEndTime;
-    m_fixedUpdateAccumulator += m_deltaTime;
-}
-
-void SDLHandler::checkInput()
-{
-    while(SDL_PollEvent(&m_event))
-    {
-        switch(m_event.type)
-        {
-        case SDL_QUIT:
-            m_isPlaying = false;
-            break;
-        case SDL_KEYDOWN:
-            break;
-        case SDL_KEYUP:
-            break;
-            default: ;
-        }
-    }
-}
-
 void SDLHandler::draw() const
 {
     SDL_RenderClear(m_renderer);
@@ -100,14 +99,11 @@ void SDLHandler::loop()
 {
     while(m_isPlaying)
     {
-        updateDeltaTime();
-        checkInput();
-        draw();
-        if (m_fixedUpdateAccumulator >= m_fixedUpdateThreshold)
-        {
-            fixedUpdate();
-            m_fixedUpdateAccumulator -= m_fixedUpdateThreshold;
-        }
+        
+        m_inputManager.checkInput();
+        std::thread fixedUpdateThread([this](){this->m_gameloop.fixedUpdate();});
+        m_gameloop.updateDeltaTime();
+        this->draw();
         SDL_Delay(0);
     }
 }

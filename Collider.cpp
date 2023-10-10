@@ -1,8 +1,9 @@
 ﻿#include "Collider.h"
 
-BoxCollider::BoxCollider(SDL_Rect p_rect)
+
+BoxCollider::BoxCollider(const SDL_Rect& p_rect)
 {
-    
+    m_rect = p_rect;
 }
 
 void BoxCollider::changeBoxPosition(const int p_x, const int p_y)

@@ -27,7 +27,7 @@ MoveableEntity::MoveableEntity(SDL_Renderer* p_renderer, const char* p_path, con
 }
 
 MoveableEntity::MoveableEntity(SDL_Renderer* p_renderer, const char* p_path, const SDL_Rect& p_rect, float p_mass,
-    float p_viscosity) : Entity(p_renderer, p_path, p_rect), m_mass(p_mass), m_viscosity(p_viscosity)
+    float p_viscosity) : Entity(p_renderer, p_path, p_rect), m_mass(p_mass), m_viscosity(p_viscosity), m_velocity({0.f})
 {
     
 }

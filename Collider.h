@@ -13,7 +13,7 @@ private:
 class BoxCollider : Collider
 {
 public:
-    explicit BoxCollider(SDL_Rect p_rect);
+    explicit BoxCollider(const SDL_Rect& p_rect);
     void changeBoxPosition(int p_x, int p_y);
     void changeBoxDimensions(int p_width, int p_height);
     SDL_Rect getColliderRect() const { return m_rect; }
