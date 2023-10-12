@@ -9,47 +9,53 @@
 
 class Entity;
 class MoveableEntity;
+class Player;
 
 class InputManager
 {
 public:
-    explicit InputManager(bool* p_isPlaying) : m_event({0}), m_isPlaying(p_isPlaying) { }
+    InputManager(bool* p_isPlaying) : m_isPlaying(p_isPlaying) { }
     void checkInput();
+    inline void setPlayerInstance(Player* p_player) { m_player = p_player; }
 private:
-    SDL_Event m_event;
+    SDL_Event m_event = {0};
     bool* m_isPlaying;
+    Player* m_player = nullptr;
 };
 
 class EntityManager
 {
 public:
     EntityManager(SDL_Renderer* p_renderer) : m_renderer(p_renderer), m_nbEntities(0), m_entities(0),
-                                              m_moveableEntities(0)
+                                              m_moveableEntities(0), m_player(nullptr)
     {
     }
+
     ~EntityManager();
     Entity* addEntity();
     Entity* addEntity(const char* p_texturePath);
     Entity* addEntity(const char* p_texturePath, const FRect& p_rect);
     MoveableEntity* addMoveableEntity(const char* p_texturePath, const FRect& p_rect, float p_mass);
+    Player* addPlayer(const char* p_texturePath, const FRect& p_rect, float p_mass);
     Vec2<float> getEntityAppliedVelocity(const MoveableEntity& p_moveableEntity, const float p_deltaTime) const;
     inline std::vector<MoveableEntity*> getMoveableEntities() { return m_moveableEntities; }
     void resetEntities() const;
     void deleteEntities() const;
     inline std::vector<Entity*> getEntities() const { return m_entities; }
-
+    inline Player* getPlayer() const { return m_player; }
 private:
     SDL_Renderer* m_renderer;
     Uint16 m_nbEntities;
     std::vector<Entity*> m_entities;
     std::vector<MoveableEntity*> m_moveableEntities;
+    Player* m_player;
 };
 
 class Gameloop
 {
 public:
-    Gameloop(SDL_Renderer* p_renderer);
-    Gameloop(SDL_Renderer* p_renderer, SDL_Texture* p_background);
+    Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer);
+    Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_Texture* p_background);
     ~Gameloop();
     void updateDeltaTime();
     void update() const;
@@ -66,8 +72,9 @@ private:
     Uint32 m_loopBeginTime;
     std::chrono::milliseconds m_fixedUpdateTime;
     std::thread m_fixedUpdateThread;
-    bool m_playingThread;
+    bool m_playingGame;
     EntityManager* m_entityManager;
+    InputManager* m_inputManager;
 };
 
 class SDLHandler

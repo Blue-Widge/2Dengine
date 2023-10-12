@@ -111,13 +111,19 @@ void MoveableEntity::applyForces(const std::chrono::milliseconds p_fixedUpdateTi
         return;
     
     const float updateTime = static_cast<float>(p_fixedUpdateTime.count()) / 1000.0f;
-    m_velocity += m_entityManager->getEntityAppliedVelocity(*this, updateTime);
-    float axisDeltaVelocity = m_velocity.x * m_mass * m_viscosity;
+    const Vec2<float> velocity = m_entityManager->getEntityAppliedVelocity(*this, updateTime);
+    float axisDeltaVelocity = velocity.x * m_mass * m_viscosity;
     move(Axis_e::x, axisDeltaVelocity, updateTime);
 
-    axisDeltaVelocity = m_velocity.y * m_mass * m_viscosity;
+    axisDeltaVelocity = velocity.y * m_mass * m_viscosity;
     move(Axis_e::y, axisDeltaVelocity, updateTime);
     m_collider->updatePosition();
+}
+
+void MoveableEntity::applyForceTo(MoveableEntity* p_entity, const Vec2<float> p_velocity)
+{
+    p_entity->m_velocity.x += p_velocity.x;
+    p_entity->m_velocity.y += p_velocity.y;
 }
 
 void MoveableEntity::resetEntity()
@@ -135,12 +141,24 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
         const float gravityMovementThreshold = m_viscosity * gravity;
         for (const auto entity : entities)
         {
-            if (entity == this)
+           if (entity == this)
                 continue;
+            const auto player = m_entityManager->getPlayer();
+            
             if (m_collider->checkGroundCollision(*entity, p_deltaTime))
             {
+                if (this->m_id == player->m_id)
+                {
+                    m_velocity.y = 0.f;
+                    player->setOnGround(true);
+                    return;
+                }
                 if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
+                {
+                    if (typeid(*entity) == typeid(MoveableEntity))
+                        applyForceTo(reinterpret_cast<MoveableEntity*>(entity), {0.f, m_viscosity * m_mass});
                     m_velocity.y *= -m_viscosity;
+                }
                 else
                 {
                     m_velocity.y = 0.f;
@@ -148,9 +166,36 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
                 }
                 break;
             }
+            else if (this->m_id == player->m_id)
+            {
+                player->setOnGround(false);
+            }
         }
         m_velocity.y += gravityDeltaVelocity;
         move(Axis_e::y, m_velocity.y, p_deltaTime);
         m_collider->updatePosition();
     }
+}
+Player* Player::m_instance = nullptr;
+
+Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p_id,
+                                  SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity)
+{
+    if (m_instance == nullptr)
+        return new Player(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity);
+    m_instance->m_mass = p_mass;
+    m_instance->m_viscosity = p_viscosity;
+    return m_instance;
+}
+
+void Player::applyMovements(const float p_deltaTime)
+{
+    move(Axis_e::x, m_velocity.x, p_deltaTime);
+    m_collider->updatePosition();
+}
+
+Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer,
+               const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) :
+MoveableEntity(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity)
+{
 }

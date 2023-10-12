@@ -19,11 +19,31 @@ void InputManager::checkInput()
                 case SDLK_ESCAPE :
                     *m_isPlaying = false;
                     break;
+                case SDLK_z:
+                case SDLK_UP:
+                    if (m_player && m_player->getOnGround()) m_player->setYVelocity(-1500.f);
+                    break;
+                
+                case SDLK_d:
+                case SDLK_RIGHT:
+                    if (m_player) m_player->setXVelocity(50.f);
+                    break;
+                case SDLK_q:
+                case SDLK_LEFT:
+                    if (m_player) m_player->setXVelocity(-50.f);
+                    break;
                 default: ;
             }
             break;
         case SDL_KEYUP:
+            case SDLK_d:
+            case SDLK_RIGHT:
+            case SDLK_q:
+            case SDLK_LEFT:
+                if (m_player) m_player->setXVelocity(0.f);
+                break;
             break;
+                
         default: ;
         }
     }
@@ -67,6 +87,16 @@ MoveableEntity* EntityManager::addMoveableEntity(const char* p_texturePath, cons
     return entity;
 }
 
+Player* EntityManager::addPlayer(const char* p_texturePath, const FRect& p_rect, float p_mass)
+{
+    auto* entity = Player::getPlayerInstance(this, m_nbEntities, m_renderer, p_texturePath, p_rect,
+        p_mass, 0.81f);
+    ++m_nbEntities;
+    m_entities.push_back(entity);
+    m_player = entity;
+    return entity;
+}
+
 
 Vec2<float> EntityManager::getEntityAppliedVelocity(const MoveableEntity& p_moveableEntity, const float p_deltaTime) const
 {
@@ -101,30 +131,33 @@ void EntityManager::deleteEntities() const
     }
 }
 
-Gameloop::Gameloop(SDL_Renderer* p_renderer) : Gameloop(p_renderer, nullptr)
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer) : Gameloop(p_inputManager, p_renderer, nullptr)
 {
     
 }
 
-Gameloop::Gameloop(SDL_Renderer* p_renderer, SDL_Texture* p_background) : m_renderer(p_renderer),
-                                                                          m_background(p_background), m_deltaTime(0.f),
-                                                                          m_loopBeginTime(0),
-                                                                           m_fixedUpdateTime(FIXED_UPDATE_TIME),
-                                                                          m_playingThread(true)
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer,
+                   SDL_Texture* p_background) : m_renderer(p_renderer), m_background(p_background),
+                                                m_deltaTime(0.f), m_loopBeginTime(0),
+                                                m_fixedUpdateTime(FIXED_UPDATE_TIME),
+                                                m_playingGame(true),
+                                                m_inputManager(p_inputManager)
 {
     m_entityManager = new EntityManager(m_renderer);
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
     auto test = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 10, 50, 50}, 10.f);
-    auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 60, 50, 50}, 10.f);
-    m_entityManager->addEntity(BASE_TEXTURE, {100, 100, 50, 50});
-    m_entityManager->addEntity(BASE_TEXTURE, {10, 300, 100, 10});
-    test->setKinematic(true);
-    test2->setKinematic(true);
+    //auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 100, 50, 50}, 10.f);
+    m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
+    auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 10.f);
+    m_inputManager->setPlayerInstance(player);
+    //test->setKinematic(true);
+    //test2->setKinematic(true);
 }
 
 Gameloop::~Gameloop()
 {
-    m_playingThread = false;
+    m_playingGame = false;
     m_fixedUpdateThread.join();
     delete m_entityManager;
 }
@@ -138,7 +171,12 @@ void Gameloop::updateDeltaTime()
 
 void Gameloop::update() const
 {
-    const auto moveableEntities = m_entityManager->getMoveableEntities(); 
+    if (!m_playingGame)
+        return;
+    const auto player = m_entityManager->getPlayer();
+    const auto moveableEntities = m_entityManager->getMoveableEntities();
+    player->applyGravity(m_deltaTime);
+    player->applyMovements(m_deltaTime);
     for (const auto moveableEntity : moveableEntities)
     {
         moveableEntity->applyGravity(m_deltaTime);
@@ -147,10 +185,9 @@ void Gameloop::update() const
 
 void Gameloop::fixedUpdate()
 {
-    while(m_playingThread)
+    while(m_playingGame)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(m_fixedUpdateTime));
-        
         auto entities = m_entityManager->getMoveableEntities();
         for(const auto entity : entities)
         {
@@ -161,17 +198,17 @@ void Gameloop::fixedUpdate()
 
 void Gameloop::playGame()
 {
-    m_playingThread = true;
+    m_playingGame = true;
 }
 
 void Gameloop::pauseGame()
 {
-    m_playingThread = false;
+    m_playingGame = false;
 }
 
 void Gameloop::stopGame()
 {
-    m_playingThread = false;
+    m_playingGame = false;
     m_fixedUpdateTime = std::chrono::milliseconds::zero();
     m_entityManager->resetEntities();
 }
@@ -232,7 +269,7 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't create background texture" << std::endl;
     }
     m_inputManager = new InputManager(&m_isPlaying);
-    m_gameloop = new Gameloop(m_renderer, m_background);
+    m_gameloop = new Gameloop(m_inputManager, m_renderer, m_background);
     
     return true;
 }

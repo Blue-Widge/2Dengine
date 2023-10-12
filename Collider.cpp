@@ -77,7 +77,8 @@ bool BoxCollider::checkGroundCollision(const Entity& p_otherEntity, const float 
     const float nextYMove = reinterpret_cast<MoveableEntity*>(m_parent)->getVelocity().y * p_deltaTime;
     if (m_rect.y + m_rect.h + nextYMove >= otherColliderRect.y &&
             m_rect.y < otherColliderRect.y + otherColliderRect.h &&
-            m_rect.x >= otherColliderRect.x && m_rect.x + m_rect.w <= otherColliderRect.x + otherColliderRect.w) 
+            (m_rect.x >= otherColliderRect.x && m_rect.x <= otherColliderRect.x + otherColliderRect.w ||
+            m_rect.x + m_rect.w >= otherColliderRect.x && m_rect.x + m_rect.w <= otherColliderRect.x + otherColliderRect.w))
         return true;
     return false;
 }
