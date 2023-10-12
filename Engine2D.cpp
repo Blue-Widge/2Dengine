@@ -7,5 +7,6 @@ int main(int argc, char* argv[])
         return 1;
     handler->loop();
     delete handler;
+    handler = nullptr;
     return 0;
 }
