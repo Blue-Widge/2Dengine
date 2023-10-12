@@ -8,12 +8,6 @@
 #include "SDL.h"
 #include "utils.h"
 
-enum
-{
-    SCREEN_WIDTH = 800,
-    SCREEN_HEIGHT = 600,
-    FIXED_UPDATE_TIME = 10 // ms
-};
 
 class Entity;
 class MoveableEntity;
@@ -21,11 +15,11 @@ class MoveableEntity;
 class InputManager
 {
 public:
-    explicit InputManager(bool& p_isPlaying) : m_event({0}), m_isPlaying(p_isPlaying) { }
+    explicit InputManager(bool* p_isPlaying) : m_event({0}), m_isPlaying(p_isPlaying) { }
     void checkInput();
 private:
     SDL_Event m_event;
-    bool& m_isPlaying;
+    bool* m_isPlaying;
 };
 
 class EntityManager
@@ -36,11 +30,11 @@ public:
     {
     }
     ~EntityManager();
-    void addEntity();
-    void addEntity(const char* p_texturePath);
-    void addEntity(const char* p_texturePath, const SDL_Rect& p_rect);
-    void addMoveableEntity(const char* p_texturePath, const SDL_Rect& p_rect, float p_mass);
-    Vec2<float> getEntityAppliedVelocity(const MoveableEntity& p_moveableEntity) const;
+    Entity* addEntity();
+    Entity* addEntity(const char* p_texturePath);
+    Entity* addEntity(const char* p_texturePath, const FRect& p_rect);
+    MoveableEntity* addMoveableEntity(const char* p_texturePath, const FRect& p_rect, float p_mass);
+    Vec2<float> getEntityAppliedVelocity(const MoveableEntity& p_moveableEntity, const float p_deltaTime) const;
     inline std::vector<MoveableEntity*> getMoveableEntities() { return m_moveableEntities; }
     void resetEntities() const;
     void deleteEntities() const;
@@ -60,6 +54,7 @@ public:
     Gameloop(SDL_Renderer* p_renderer, SDL_Texture* p_background);
     ~Gameloop();
     void updateDeltaTime();
+    void update() const;
     void fixedUpdate();
     void draw() const;
     void playGame();
@@ -82,7 +77,7 @@ class SDLHandler
 public:
     ~SDLHandler();
     bool initSDL();
-    void loop();
+    void loop() const;
     static SDLHandler* getHandlerInstance();
     bool getIsPlaying() const { return m_isPlaying; }
 private:

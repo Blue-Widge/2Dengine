@@ -2,12 +2,12 @@
 #include <cmath>
 
 Entity::Entity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
-               const SDL_Rect& p_rect) : m_id(p_id), m_renderer(p_renderer), m_rect(p_rect),
+               const FRect& p_rect) : m_id(p_id), m_renderer(p_renderer), m_rect(p_rect),
                                          m_entityManager(p_entityManager)
 {
     const auto surface = SDL_LoadBMP(p_path);
     m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);
-    m_collider = reinterpret_cast<Collider*>(new BoxCollider(m_rect));
+    m_collider = reinterpret_cast<Collider*>(new BoxCollider(this, m_rect));
 }
 
 Entity::~Entity()
@@ -16,7 +16,18 @@ Entity::~Entity()
     delete m_collider;
 }
 
-void Entity::setSize(const int p_w, const int p_h)
+void Entity::setPosition(const float p_x, const float p_y)
+{
+    m_rect.x = p_x > SCREEN_WIDTH ? SCREEN_WIDTH : p_x;
+    m_rect.y = p_y > SCREEN_HEIGHT ? SCREEN_HEIGHT : p_y;
+}
+
+Vec2<float> Entity::getPosition() const
+{
+    return {m_rect.x, m_rect.y};
+}
+
+void Entity::setSize(const float p_w, const float p_h)
 {
     m_rect.w = p_w;
     m_rect.h = p_h;
@@ -28,14 +39,14 @@ bool Entity::operator==(const Entity& p_entity) const
 }
 
 MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer,
-                               const char* p_path, const SDL_Rect& p_rect,
+                               const char* p_path, const FRect& p_rect,
                                const float p_mass) : MoveableEntity(p_entityManager, p_id, p_renderer, p_path, p_rect,
-    p_mass, 1.f)
+    p_mass, 0.31f)
 {
 }
 
 MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer,
-                               const char* p_path, const SDL_Rect& p_rect, float p_mass,
+                               const char* p_path, const FRect& p_rect, float p_mass,
                                float p_viscosity) : Entity(p_entityManager, p_id, p_renderer, p_path, p_rect),
                                                     m_initialPos({0, 0}),
                                                     m_mass(p_mass), m_viscosity(p_viscosity),
@@ -45,47 +56,44 @@ MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id
     m_initialPos.y = p_rect.y;
 }
 
-void MoveableEntity::setPosition(const int p_x, const int p_y)
+void MoveableEntity::setPosition(const float p_x, const float p_y)
 {
-    const SDL_Rect colliderRect = m_collider->getColliderRect();
-    m_collider->changePosition(colliderRect.x - m_rect.x + p_x, colliderRect.y - m_rect.y + p_y);
     m_initialPos.x = p_x;
     m_initialPos.y = p_y;
     Entity::setPosition(p_x, p_y);
+    m_collider->updatePosition();
 }
 
 void MoveableEntity::setRotation(const float p_rotationAngle)
 {
-    m_collider->changeRotation(p_rotationAngle);
+    m_collider->setRotation(p_rotationAngle);
     Entity::setRotation(p_rotationAngle);
 }
 
-void MoveableEntity::setSize(const int p_w, const int p_h)
+void MoveableEntity::setSize(float p_w, float p_h)
 {
-    const SDL_Rect colliderRect = m_collider->getColliderRect();
-    m_collider->changeDimensions(colliderRect.w - m_rect.w + p_w, colliderRect.h - m_rect.h + p_h);
+    const FRect colliderRect = m_collider->getColliderRect();
+    m_collider->setDimensions(colliderRect.w - m_rect.w + p_w, colliderRect.h - m_rect.h + p_h);
     Entity::setSize(p_w, p_h);
 }
 
 void MoveableEntity::move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime)
 {
     float deltaPos = p_deltaTime * p_moveSpeed;
-    const SDL_Rect colliderRect = m_collider->getColliderRect();
+    const FRect colliderRect = m_collider->getColliderRect();
 
     if (p_axis == x)
     {
-        if (m_rect.x + m_rect.w > SCREEN_WIDTH)
-            deltaPos = static_cast<float>(SCREEN_WIDTH - m_rect.w);
-        m_rect.x += static_cast<int>(deltaPos);
-        m_collider->changePosition(colliderRect.x + deltaPos, colliderRect.y);
+        if (colliderRect.x + colliderRect.w > SCREEN_WIDTH)
+            deltaPos = SCREEN_WIDTH - colliderRect.w;
+        m_rect.x += deltaPos;
         return;
     }
-    if (m_rect.y + m_rect.h > SCREEN_HEIGHT)
-        deltaPos = static_cast<float>(SCREEN_HEIGHT - m_rect.h);
-    m_rect.y += static_cast<int>(deltaPos);
-    m_collider->changePosition(colliderRect.x, colliderRect.y + deltaPos);
-
-    //TODO : don't stay inside the screen and collider is off screen (a lot)
+    if (colliderRect.y + colliderRect.h > SCREEN_HEIGHT)
+        deltaPos = SCREEN_HEIGHT - colliderRect.h;
+    m_rect.y += deltaPos;
+    
+    m_collider->updatePosition();
 }
 
 void MoveableEntity::rotate(float p_rotationSpeed, float p_deltaTime)
@@ -97,33 +105,51 @@ void MoveableEntity::rotate(float p_rotationSpeed, float p_deltaTime)
 
 void MoveableEntity::applyForces(const std::chrono::milliseconds p_fixedUpdateTime)
 {
-    //no fixedUpdateTime means that the game hasn't started
+    //no fixedUpdateTime means that the thread hasn't started
     if (p_fixedUpdateTime.count() == 0 || m_isKinematic)
         return;
     
-    SDL_Rect colliderRect = m_collider->getColliderRect();
-    const auto updateTime = static_cast<float>(p_fixedUpdateTime.count());
-    
-    if (m_gravityReactive)
-    {
-        const int gravityDeltaVelocity = gravity * m_viscosity;
-        move(Axis_e::y, gravity * m_viscosity, updateTime);
-        m_collider->changePosition(colliderRect.x, colliderRect.y + static_cast<int>(updateTime * gravityDeltaVelocity));
-        colliderRect = m_collider->getColliderRect();
-    }
-    
-    const Vec2<float> velocity = m_entityManager->getEntityAppliedVelocity(*this);
-    float axisDeltaVelocity = velocity.x * m_mass * m_viscosity;
+    const float updateTime = static_cast<float>(p_fixedUpdateTime.count()) / 1000.0f;
+    m_velocity += m_entityManager->getEntityAppliedVelocity(*this, updateTime);
+    float axisDeltaVelocity = m_velocity.x * m_mass * m_viscosity;
     move(Axis_e::x, axisDeltaVelocity, updateTime);
-    m_collider->changePosition(colliderRect.x + static_cast<int>(axisDeltaVelocity * updateTime), colliderRect.y);
 
-    axisDeltaVelocity = velocity.y * m_mass * m_viscosity;
+    axisDeltaVelocity = m_velocity.y * m_mass * m_viscosity;
     move(Axis_e::y, axisDeltaVelocity, updateTime);
-    m_collider->changePosition(colliderRect.x, colliderRect.y + static_cast<int>(axisDeltaVelocity * updateTime));
+    m_collider->updatePosition();
 }
 
 void MoveableEntity::resetEntity()
 {
     setPosition(m_initialPos.x, m_initialPos.y);
     setRotation(0.f);
+}
+
+void MoveableEntity::applyGravity(float p_deltaTime)
+{
+    if (m_gravityReactive)
+    {
+        const float gravityDeltaVelocity = gravity * m_viscosity;
+        const auto entities = m_entityManager->getEntities();
+        const float gravityMovementThreshold = m_viscosity * gravity;
+        for (const auto entity : entities)
+        {
+            if (entity == this)
+                continue;
+            if (m_collider->checkGroundCollision(*entity, p_deltaTime))
+            {
+                if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
+                    m_velocity.y *= -m_viscosity;
+                else
+                {
+                    m_velocity.y = 0.f;
+                    return;
+                }
+                break;
+            }
+        }
+        m_velocity.y += gravityDeltaVelocity;
+        move(Axis_e::y, m_velocity.y, p_deltaTime);
+        m_collider->updatePosition();
+    }
 }

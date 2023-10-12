@@ -9,25 +9,33 @@ class MoveableEntity;
 class Collider
 {
 public:
-    Collider() = default;
+    Collider(Entity* p_parent, const FRect& p_rect) : m_parent(p_parent), m_rect(p_rect) { }
     virtual ~Collider() = default;
-    virtual void changePosition(int p_x, int p_y) { }
-    virtual void changeDimensions(int p_width, int p_height) { }
-    virtual void changeRotation(float p_rotationAngle) { }
-    virtual Vec2<float> checkCollision(const MoveableEntity& p_moveableEntity, const Entity& p_otherEntity) { return {};}
-    SDL_Rect getColliderRect() const { return m_rect; }
+    virtual void setPosition(const float p_x, const float p_y) { }
+    virtual void updatePosition() { }
+    virtual void updateDeltaPos() { }
+    virtual void setDimensions(const float p_width, const float p_height) { }
+    virtual void setRotation(float p_rotationAngle) { }
+    virtual Vec2<float> checkCollisions(const Entity& p_otherEntity, float p_deltaTime) { return {};}
+    virtual bool checkGroundCollision(const Entity& p_otherEntity, float p_deltaTime) { return {};}
+    FRect getColliderRect() const { return m_rect; }
 protected:
-    SDL_Rect m_rect = {0,0,0,0};
+    Entity* m_parent;
+    FRect m_rect = {0,0,0,0};
+    Vec2<int> m_parentDeltaPos = {0, 0};
     float m_rotation = 0.f;
     
 };
 
-class BoxCollider : Collider
+class BoxCollider : public Collider
 {
 public:
-    explicit BoxCollider(const SDL_Rect& p_rect);
-    void changePosition(int p_x, int p_y) override;
-    void changeDimensions(int p_width, int p_height) override;
-    void changeRotation(float p_rotationAngle) override;
-    Vec2<float> checkCollision(const MoveableEntity& p_moveableEntity, const Entity& p_otherEntity) override;
+    BoxCollider(Entity* p_parent, const FRect& p_rect);
+    void setPosition(const float p_x, const float p_y) override;
+    void updatePosition() override;
+    void updateDeltaPos() override;
+    void setDimensions(const float p_width, const float p_height) override;
+    void setRotation(float p_rotationAngle) override;
+    Vec2<float> checkCollisions(const Entity& p_otherEntity, float p_deltaTime) override;
+    bool checkGroundCollision(const Entity& p_otherEntity, float p_deltaTime) override;
 };
