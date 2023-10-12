@@ -22,7 +22,7 @@ public:
 protected:
     Entity* m_parent;
     FRect m_rect = {0,0,0,0};
-    Vec2<int> m_parentDeltaPos = {0, 0};
+    Vec2<float> m_parentDeltaPos = {0, 0};
     float m_rotation = 0.f;
     
 };
@@ -31,10 +31,10 @@ class BoxCollider : public Collider
 {
 public:
     BoxCollider(Entity* p_parent, const FRect& p_rect);
-    void setPosition(const float p_x, const float p_y) override;
+    void setPosition(float p_x, float p_y) override;
     void updatePosition() override;
     void updateDeltaPos() override;
-    void setDimensions(const float p_width, const float p_height) override;
+    void setDimensions(float p_width, float p_height) override;
     void setRotation(float p_rotationAngle) override;
     Vec2<float> checkCollisions(const Entity& p_otherEntity, float p_deltaTime) override;
     bool checkGroundCollision(const Entity& p_otherEntity, float p_deltaTime) override;

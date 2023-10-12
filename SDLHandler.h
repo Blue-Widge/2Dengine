@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include <future>
-#include <iostream>
-#include <ostream>
 #include <vector>
 
 #include "SDL.h"

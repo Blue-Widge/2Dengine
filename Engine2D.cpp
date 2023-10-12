@@ -1,6 +1,6 @@
 #include "SDLHandler.h"
 
-int main(int argc, char* argv[])
+int main()
 {
     SDLHandler* handler = SDLHandler::getHandlerInstance();
     if (!handler->initSDL())

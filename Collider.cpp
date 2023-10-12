@@ -34,7 +34,7 @@ void BoxCollider::setDimensions(const float p_width, const float p_height)
     m_rect.h = p_height;
 }
 
-void BoxCollider::setRotation(float p_rotationAngle)
+void BoxCollider::setRotation(const float p_rotationAngle)
 {
     m_rotation = p_rotationAngle;
 }
@@ -43,7 +43,7 @@ Vec2<float> BoxCollider::checkCollisions(const Entity& p_otherEntity, const floa
 {
     Vec2<float> velocity = {0, 0};
     const FRect otherColliderRect = p_otherEntity.getCollider()->getColliderRect();
-    auto parent = reinterpret_cast<MoveableEntity*>(m_parent);
+    const MoveableEntity* parent = reinterpret_cast<MoveableEntity*>(m_parent);
     const Vec2<float> currVelocity = parent->getVelocity();
     const float parentViscosity = parent->getViscosity();
 
