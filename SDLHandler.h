@@ -16,11 +16,13 @@ class InputManager
 public:
     InputManager(bool* p_isPlaying) : m_isPlaying(p_isPlaying) { }
     void checkInput();
+    void sendControls() const;
     inline void setPlayerInstance(Player* p_player) { m_player = p_player; }
 private:
     SDL_Event m_event = {0};
     bool* m_isPlaying;
     Player* m_player = nullptr;
+    bool m_controls[controlsNb] = {false};
 };
 
 class EntityManager
@@ -60,6 +62,7 @@ public:
     void updateDeltaTime();
     void update() const;
     void fixedUpdate();
+    SDL_Rect convertEntityRectToScene(const FRect& p_rect) const;
     void draw() const;
     void playGame();
     void pauseGame();
@@ -67,6 +70,9 @@ public:
 private:
     SDL_Renderer* m_renderer;
     SDL_Texture* m_background;
+
+    const SDL_Rect m_sceneRect = {(SCREEN_WIDTH - SCENE_WIDTH) / 2, 0, SCENE_WIDTH, SCENE_HEIGHT};
+    
     
     float m_deltaTime;
     Uint32 m_loopBeginTime;
@@ -86,8 +92,8 @@ public:
     static SDLHandler* getHandlerInstance();
     bool getIsPlaying() const { return m_isPlaying; }
 private:
-    SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr), m_isPlaying(true),
-                   m_inputManager(nullptr), m_gameloop(nullptr)
+    SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr),
+        m_isPlaying(true), m_inputManager(nullptr), m_gameloop(nullptr)
     {
     }
 

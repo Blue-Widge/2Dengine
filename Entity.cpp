@@ -19,8 +19,8 @@ Entity::~Entity()
 
 void Entity::setPosition(const float p_x, const float p_y)
 {
-    m_rect.x = (p_x + m_rect.w) > SCREEN_WIDTH ? (SCREEN_WIDTH - m_rect.w) : p_x;
-    m_rect.y = (p_y + m_rect.h) > SCREEN_HEIGHT ? (SCREEN_HEIGHT - m_rect.h) : p_y;
+    m_rect.x = (p_x + m_rect.w) > SCENE_WIDTH ? (SCENE_WIDTH - m_rect.w) : p_x;
+    m_rect.y = (p_y + m_rect.h) > SCENE_HEIGHT ? (SCENE_HEIGHT - m_rect.h) : p_y;
 }
 
 Vec2<float> Entity::getPosition() const
@@ -85,13 +85,13 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
 
     if (p_axis == x)
     {
-        if (colliderRect.x + colliderRect.w > SCREEN_WIDTH)
-            deltaPos = SCREEN_WIDTH - colliderRect.w;
+        if (colliderRect.x + colliderRect.w > SCENE_WIDTH)
+            deltaPos = SCENE_WIDTH - colliderRect.w;
         m_rect.x += deltaPos;
         return;
     }
-    if (colliderRect.y + colliderRect.h > SCREEN_HEIGHT)
-        deltaPos = SCREEN_HEIGHT - colliderRect.h;
+    if (colliderRect.y + colliderRect.h > SCENE_HEIGHT)
+        deltaPos = SCENE_HEIGHT - colliderRect.h;
     m_rect.y += deltaPos;
     
     m_collider->updatePosition();
