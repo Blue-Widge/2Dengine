@@ -101,7 +101,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/Packages/SDL2/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies); SDL2.lib; SDL2main.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies); SDL2.lib; SDL2main.lib; SDL2_ttf.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -164,11 +164,13 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Engine2D.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="SDLHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collider.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="Inspector.h" />
     <ClInclude Include="SDLHandler.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

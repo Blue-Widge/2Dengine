@@ -3,7 +3,6 @@
 
 #include "Entity.h"
 
-
 void InputManager::checkInput()
 {
     while (SDL_PollEvent(&m_event))
@@ -44,21 +43,37 @@ void InputManager::checkInput()
                 case SDLK_z:
                 case SDLK_UP:
                     m_controls[UP] = false;
-                    break;
+                break;
                 case SDLK_d:
                 case SDLK_RIGHT:
                     m_controls[RIGHT] = false;
-                    break;
+                break;
                 case SDLK_q:
                 case SDLK_LEFT:
                     m_controls[LEFT] = false;
-                    break;
+                break;
                 case SDLK_e:
                 case SDLK_RETURN:
                     m_controls[USE] = false;
                 break;
                 default: ;
             }
+            case SDL_MOUSEBUTTONUP:
+                if (m_gameloop->getPlayingGame())
+                    break; 
+            break;
+            
+            case SDL_MOUSEBUTTONDOWN:
+                if (m_gameloop->getPlayingGame())
+                    break;
+                if (m_event.button.button == SDL_BUTTON_LEFT)
+                {
+                    m_inspector->selectEntity(m_gameloop->getEntityFromPos(m_event.button.x, m_event.button.y));
+                    m_inspector->modifyInfoValue(m_event.button.x, m_event.button.y);
+                }
+            break;
+            default:
+                break;
         }
     }
 }
@@ -162,24 +177,25 @@ void EntityManager::deleteEntities() const
     }
 }
 
-Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer) : Gameloop(p_inputManager, p_renderer,
-    nullptr)
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const SDL_Rect& p_sceneRect) : Gameloop(p_inputManager, p_renderer,
+    p_sceneRect, nullptr)
 {
 }
 
-Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer,
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const SDL_Rect& p_sceneRect,
                    SDL_Texture* p_background) : m_renderer(p_renderer), m_background(p_background),
-                                                m_deltaTime(0.f), m_loopBeginTime(0),
+                                                m_sceneRect(p_sceneRect), m_deltaTime(0.f),
+                                                m_loopBeginTime(0),
                                                 m_fixedUpdateTime(FIXED_UPDATE_TIME),
-                                                m_playingGame(true),
+                                                m_playingGame(false),
                                                 m_inputManager(p_inputManager)
 {
     m_entityManager = new EntityManager(m_renderer);
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
     auto test = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 10, 50, 50}, 10.f);
     //auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 100, 50, 50}, 10.f);
-    m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
-    m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
+    //m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
+    //m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
     auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 10.f);
     m_inputManager->setPlayerInstance(player);
     //test->setKinematic(true);
@@ -254,6 +270,20 @@ void Gameloop::stopGame()
     m_entityManager->resetEntities();
 }
 
+Entity* Gameloop::getEntityFromPos(int p_x, int p_y) const
+{
+    p_x -= (SCREEN_WIDTH - SCENE_WIDTH) / 2;
+    const auto entities = m_entityManager->getEntities();
+    for (Entity* entity : entities)
+    {
+        const auto entityRect = entity->getEntityRect();
+        if (p_x >= entityRect.x && p_x <= entityRect.x + entityRect.w &&
+            p_y >= entityRect.y && p_y <= entityRect.y + entityRect.h)
+                return entity;
+    }
+    return nullptr;
+}
+
 SDLHandler* SDLHandler::instance = nullptr;
 
 SDLHandler* SDLHandler::getHandlerInstance()
@@ -268,6 +298,8 @@ SDLHandler::~SDLHandler()
     SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
     SDL_DestroyTexture(m_background);
+    TTF_CloseFont(m_font);
+    TTF_Quit();
     m_window = nullptr;
     m_renderer = nullptr;
     m_background = nullptr;
@@ -281,6 +313,18 @@ bool SDLHandler::initSDL()
         return false;
     }
 
+    if (TTF_Init())
+    {
+        std::cerr << "Couldn't init TTF" << std::endl;
+        return false;
+    }
+
+    if (loadFont())
+    {
+        std::cerr << "Couldn't load font" << std::endl;
+        return false;
+    }
+    
     m_window = SDL_CreateWindow("2D Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
         SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!m_window)
@@ -308,15 +352,25 @@ bool SDLHandler::initSDL()
     {
         std::cerr << "Couldn't create background texture" << std::endl;
     }
-    m_inputManager = new InputManager(&m_isPlaying);
-    m_gameloop = new Gameloop(m_inputManager, m_renderer, m_background);
-
+    const int inspectorXpos = m_sceneRect.x + m_sceneRect.w;
+    m_inspector = new Inspector(inspectorXpos, SCREEN_WIDTH - inspectorXpos, m_renderer, m_font);
+    
+    m_inputManager = new InputManager(&m_isPlaying, m_inspector);
+    m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);
+    m_inputManager->setGameloopObject(m_gameloop);
     return true;
+}
+
+bool SDLHandler::loadFont()
+{
+    m_font = TTF_OpenFont("./Font/segoeui.ttf", 20);
+    return (m_font == nullptr);
 }
 
 void Gameloop::draw() const
 {
-    SDL_RenderClear(m_renderer);SDL_RenderCopy(m_renderer, m_background, nullptr, &m_sceneRect);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderCopy(m_renderer, m_background, nullptr, &m_sceneRect);
     const std::vector<Entity*> entities = m_entityManager->getEntities();
     for (const auto entity : entities)
     {
@@ -324,7 +378,6 @@ void Gameloop::draw() const
         const SDL_Rect convertedRect = convertEntityRectToScene(entityRect);
         SDL_RenderCopy(m_renderer, entity->getTexture(), nullptr, &convertedRect);
     }
-    SDL_RenderPresent(m_renderer);
 }
 
 void SDLHandler::loop() const
@@ -336,6 +389,8 @@ void SDLHandler::loop() const
         m_gameloop->updateDeltaTime();
         m_gameloop->update();
         m_gameloop->draw();
+        m_inspector->displayInspector();
+        SDL_RenderPresent(m_renderer);
         SDL_Delay(0);
     }
     SDL_Quit();

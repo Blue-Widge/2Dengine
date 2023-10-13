@@ -23,11 +23,6 @@ void Entity::setPosition(const float p_x, const float p_y)
     m_rect.y = (p_y + m_rect.h) > SCENE_HEIGHT ? (SCENE_HEIGHT - m_rect.h) : p_y;
 }
 
-Vec2<float> Entity::getPosition() const
-{
-    return {m_rect.x, m_rect.y};
-}
-
 void Entity::setSize(const float p_w, const float p_h)
 {
     m_rect.w = p_w;

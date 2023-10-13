@@ -18,8 +18,7 @@ public:
     ~Entity();
     
     void setPosition(float p_x, float p_y);
-    Vec2<float> getPosition() const;
-    
+    inline Vec2<float> getPosition() const { return {m_rect.x, m_rect.y}; }
     inline void setRotation(const float p_rotationAngle) { m_rotationAngle = p_rotationAngle; }
     void setSize(float p_w, float p_h);
     inline FRect getEntityRect() const { return m_rect; }
@@ -27,6 +26,7 @@ public:
     inline Collider* getCollider() const { return m_collider; }
     inline SDL_Texture* getTexture() const { return m_texture; }
     inline Uint16 getId() const { return m_id; }
+
 protected:
     Uint16 m_id = 0;
     

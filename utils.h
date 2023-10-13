@@ -23,6 +23,12 @@ struct FRect
     float w, h;
 };
 
+inline SDL_Rect ConvertFRect(const FRect& p_rect)
+{
+    const SDL_Rect rect = {static_cast<int>(p_rect.x), static_cast<int>(p_rect.y), static_cast<int>(p_rect.w), static_cast<int>(p_rect.h)};
+    return rect;
+}
+
 template <typename T>
 Vec2<T> operator +(const Vec2<T>& p_first, const Vec2<T>& p_second)
 {
