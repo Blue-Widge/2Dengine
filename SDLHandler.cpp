@@ -68,8 +68,11 @@ void InputManager::checkInput()
                     break;
                 if (m_event.button.button == SDL_BUTTON_LEFT)
                 {
-                    m_inspector->selectEntity(m_gameloop->getEntityFromPos(m_event.button.x, m_event.button.y));
-                    m_inspector->modifyInfoValue(m_event.button.x, m_event.button.y);
+                    if (m_event.button.x > SCENE_WIDTH || m_event.button.y > SCENE_HEIGHT)
+                        break;
+                    Entity* entity = m_gameloop->getEntityFromPos(m_event.button.x, m_event.button.y);
+                    m_inspector->selectEntity(entity);
+                    //m_inspector->modifyInfoValue(m_event.button.x, m_event.button.y);
                 }
             break;
             default:
@@ -192,14 +195,13 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const
 {
     m_entityManager = new EntityManager(m_renderer);
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
+    
     auto test = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 10, 50, 50}, 10.f);
     //auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 100, 50, 50}, 10.f);
-    //m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
-    //m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
+    m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
     auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 10.f);
     m_inputManager->setPlayerInstance(player);
-    //test->setKinematic(true);
-    //test2->setKinematic(true);
 }
 
 Gameloop::~Gameloop()
@@ -353,7 +355,7 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't create background texture" << std::endl;
     }
     const int inspectorXpos = m_sceneRect.x + m_sceneRect.w;
-    m_inspector = new Inspector(inspectorXpos, SCREEN_WIDTH - inspectorXpos, m_renderer, m_font);
+    m_inspector = new Inspector(m_renderer, m_font);
     
     m_inputManager = new InputManager(&m_isPlaying, m_inspector);
     m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);

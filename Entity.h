@@ -11,6 +11,8 @@ enum Axis_e
 #define BASE_TEXTURE "./images/baseTexture.bmp"
 #define PLAYER_BASE_TEXTURE "./images/playerTexture.bmp"
 
+using std::to_string;
+
 class Entity
 {
 public:
@@ -20,13 +22,18 @@ public:
     void setPosition(float p_x, float p_y);
     inline Vec2<float> getPosition() const { return {m_rect.x, m_rect.y}; }
     inline void setRotation(const float p_rotationAngle) { m_rotationAngle = p_rotationAngle; }
+    inline float getRotation() const { return m_rotationAngle; }
     void setSize(float p_w, float p_h);
+    Vec2<float> getSize() const { return {m_rect.w, m_rect.h}; } 
     inline FRect getEntityRect() const { return m_rect; }
     bool operator==(const Entity& p_entity) const;
     inline Collider* getCollider() const { return m_collider; }
     inline SDL_Texture* getTexture() const { return m_texture; }
+    inline void setTexture(const char* p_path);
     inline Uint16 getId() const { return m_id; }
-
+    inline Uint16 getDepth() const { return m_depth; }
+    inline void setDepth(const Uint16 p_depth) { m_depth = p_depth; }
+    std::string prepareEntityInfos() const;
 protected:
     Uint16 m_id = 0;
     
@@ -54,10 +61,13 @@ public:
     void move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime);
     void rotate(float p_rotationSpeed, float p_deltaTime);
     void applyForces(std::chrono::milliseconds p_fixedUpdateTime);
+    inline float getMass() const { return m_mass; }
+    inline bool getIsGravityReactive() const { return m_gravityReactive; }
     static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     inline Vec2<float> getVelocity() const { return m_velocity; }
     void resetEntity();
     void applyGravity(float p_deltaTime);
+    std::string prepareEntityInfos() const;
     inline bool getIsKinematic() const { return m_isKinematic; }
     inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline float getViscosity() const { return m_viscosity; }
@@ -82,6 +92,7 @@ public:
     inline void setXVelocity(const float p_x) {m_velocity.x = p_x;}
     inline void setYVelocity(const float p_y) {m_velocity.y = p_y;}
     void applyMovements(float p_deltaTime);
+    std::string prepareEntityInfos() const;
 private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,

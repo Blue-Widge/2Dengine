@@ -6,9 +6,7 @@ Entity::Entity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* 
                const FRect& p_rect) : m_id(p_id), m_renderer(p_renderer), m_rect(p_rect),
                                       m_entityManager(p_entityManager)
 {
-    const auto surface = SDL_LoadBMP(p_path);
-    m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);
-    m_collider = reinterpret_cast<Collider*>(new BoxCollider(this, m_rect));
+    setTexture(p_path);
 }
 
 Entity::~Entity()
@@ -32,6 +30,31 @@ void Entity::setSize(const float p_w, const float p_h)
 bool Entity::operator==(const Entity& p_entity) const
 {
     return this->m_id == p_entity.m_id;
+}
+
+void Entity::setTexture(const char* p_path)
+{
+    const auto surface = SDL_LoadBMP(p_path);
+    m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);
+    m_collider = reinterpret_cast<Collider*>(new BoxCollider(this, m_rect));
+}
+
+std::string Entity::prepareEntityInfos() const
+{
+    const SDL_Rect entityRect = convertFRect(getEntityRect());
+    const SDL_Rect colliderRect = convertFRect(getCollider()->getColliderRect());
+
+    //no need to recreate these variables at runtime but I don't see them as object's attribute
+    const std::string entityInfosString = "Entity's ID : " + to_string(m_id) + "\n"
+        "Entity's position : " + "x : " + to_string(entityRect.x) + " y : " + to_string(entityRect.y) + "\n"
+        "Entity's rotation : " + to_string(m_rotationAngle) + "\n"
+        "Entity's size : " + "x : " + to_string(entityRect.w) + " y : " + to_string(entityRect.h) + "\n"
+        "Collider's position : " + "x : " + to_string(colliderRect.x) + " y : " + to_string(colliderRect.y) +
+        "\n"
+        "Collider's size : " + "w : " + to_string(colliderRect.w) + " h : " + to_string(colliderRect.h) + "\n"
+        "Entity's depth : " + to_string(m_depth) + "\n"
+        "Entity's texture : \n";
+    return entityInfosString;
 }
 
 MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer,
@@ -88,7 +111,7 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
     if (colliderRect.y + colliderRect.h > SCENE_HEIGHT)
         deltaPos = SCENE_HEIGHT - colliderRect.h;
     m_rect.y += deltaPos;
-    
+
     m_collider->updatePosition();
 }
 
@@ -104,13 +127,18 @@ void MoveableEntity::applyForces(const std::chrono::milliseconds p_fixedUpdateTi
     //no fixedUpdateTime means that the thread hasn't started
     if (p_fixedUpdateTime.count() == 0 || m_isKinematic)
         return;
-    
+
     const float updateTime = static_cast<float>(p_fixedUpdateTime.count()) / 1000.0f;
     const Vec2<float> velocity = m_entityManager->getEntityAppliedVelocity(*this, updateTime);
     float axisDeltaVelocity = velocity.x * m_mass * m_viscosity;
     move(Axis_e::x, axisDeltaVelocity, updateTime);
 
     axisDeltaVelocity = velocity.y * m_mass * m_viscosity;
+
+    // lock the access to the entity infos to the main thread to avoid
+    // incoherent behaviour
+    std::lock_guard<std::mutex> lock(m_entityManager->getEntitiesMutex());
+
     move(Axis_e::y, axisDeltaVelocity, updateTime);
     m_collider->updatePosition();
 }
@@ -136,10 +164,10 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
         const float gravityMovementThreshold = m_viscosity * gravity;
         for (const auto entity : entities)
         {
-           if (entity == this)
+            if (entity == this)
                 continue;
             const auto player = m_entityManager->getPlayer();
-            
+
             if (m_collider->checkGroundCollision(*entity, p_deltaTime))
             {
                 if (this->m_id == player->m_id)
@@ -171,10 +199,22 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
         m_collider->updatePosition();
     }
 }
+
+std::string MoveableEntity::prepareEntityInfos() const
+{
+    const std::string moveableEntityInfosString = Entity::prepareEntityInfos() +
+        "Entity's mass : " + to_string(m_mass) + "kg\n"
+        "Entity's viscosity : " + to_string(m_viscosity) + "\n"
+        "Gravity reactive : " + to_string(m_gravityReactive) + "\n"
+        "Is kinematic : " + to_string(m_isKinematic) + "\n";
+    return moveableEntityInfosString;
+}
+
 Player* Player::m_instance = nullptr;
 
 Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p_id,
-                                  SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity)
+                                  SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, const float p_mass,
+                                  const float p_viscosity)
 {
     if (m_instance == nullptr)
         return new Player(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity);
@@ -189,8 +229,13 @@ void Player::applyMovements(const float p_deltaTime)
     m_collider->updatePosition();
 }
 
+std::string Player::prepareEntityInfos() const
+{
+    return MoveableEntity::prepareEntityInfos();
+}
+
 Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer,
-               const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) :
-MoveableEntity(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity)
+               const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) : MoveableEntity(
+    p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity)
 {
 }
