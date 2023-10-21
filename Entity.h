@@ -33,7 +33,7 @@ public:
     inline Uint16 getId() const { return m_id; }
     inline Uint16 getDepth() const { return m_depth; }
     inline void setDepth(const Uint16 p_depth) { m_depth = p_depth; }
-    std::string prepareEntityInfos() const;
+    virtual std::string prepareEntityInfos() const;
 protected:
     Uint16 m_id = 0;
     
@@ -67,7 +67,7 @@ public:
     inline Vec2<float> getVelocity() const { return m_velocity; }
     void resetEntity();
     void applyGravity(float p_deltaTime);
-    std::string prepareEntityInfos() const;
+    virtual std::string prepareEntityInfos() const override;
     inline bool getIsKinematic() const { return m_isKinematic; }
     inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline float getViscosity() const { return m_viscosity; }
@@ -92,7 +92,7 @@ public:
     inline void setXVelocity(const float p_x) {m_velocity.x = p_x;}
     inline void setYVelocity(const float p_y) {m_velocity.y = p_y;}
     void applyMovements(float p_deltaTime);
-    std::string prepareEntityInfos() const;
+    std::string prepareEntityInfos() const override;
 private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,

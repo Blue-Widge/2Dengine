@@ -37,7 +37,12 @@ void Inspector::displayInspector()
     SDL_RenderCopy(m_renderer, m_titleTexture, nullptr, &m_titleRect);
     if (m_entityPtr == nullptr)
         return;
-    std::string infos = m_entityPtr->prepareEntityInfos();
+    std::string infos;
+    if (m_entityPtr != m_lastEntityPtr)
+    {
+        infos = m_entityPtr->prepareEntityInfos();
+        m_lastEntityPtr = m_entityPtr == nullptr ? m_lastEntityPtr : m_entityPtr;
+    }
     displayEntityInfos(infos, m_entityPtr->getId());
     SDL_RenderCopy(m_renderer, m_selectionTexture, nullptr, &m_selectionRect);
 }

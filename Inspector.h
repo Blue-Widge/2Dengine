@@ -36,4 +36,5 @@ private:
     std::string m_currentText;
     
     std::vector<std::tuple<SDL_Texture*, SDL_Rect>> m_infosTexturesAndRect;
+    Entity* m_lastEntityPtr = nullptr;
 };
