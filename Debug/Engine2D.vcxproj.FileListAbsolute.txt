@@ -1,2 +1,0 @@
-C:\Users\Yann\RiderProjects\Engine2D\Debug\Engine2D.exe
-C:\Users\BlueWidge\RiderProjects\2dengine\Debug\Engine2D.exe
