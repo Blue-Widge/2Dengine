@@ -1,5 +1,4 @@
 ﻿#include "Collider.h"
-
 #include "Entity.h"
 
 BoxCollider::BoxCollider(Entity* p_parent, const FRect& p_rect) : Collider(p_parent, p_rect)

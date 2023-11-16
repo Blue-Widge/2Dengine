@@ -1,17 +1,16 @@
 ﻿#pragma once
+#include <SDL.h>
+#include <string>
+#include <chrono>
+#include <mutex>
+#include "utils.h"
 #include "Collider.h"
-#include "SDLHandler.h"
-
-enum Axis_e
-{
-    x,
-    y
-};
 
 #define BASE_TEXTURE "./images/baseTexture.bmp"
 #define PLAYER_BASE_TEXTURE "./images/playerTexture.bmp"
 
 using std::to_string;
+class EntityManager;
 
 class Entity
 {
@@ -54,7 +53,6 @@ public:
                    const FRect& p_rect, float p_mass);
     MoveableEntity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                    const FRect& p_rect, float p_mass, float p_viscosity);
-    
     void setPosition(float p_x, float p_y);
     void setRotation(float p_rotationAngle);
     void setSize(float p_w, float p_h);
@@ -63,7 +61,6 @@ public:
     void applyForces(std::chrono::milliseconds p_fixedUpdateTime);
     inline float getMass() const { return m_mass; }
     inline bool getIsGravityReactive() const { return m_gravityReactive; }
-    static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     inline Vec2<float> getVelocity() const { return m_velocity; }
     void resetEntity();
     void applyGravity(float p_deltaTime);
@@ -72,6 +69,7 @@ public:
     inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline float getViscosity() const { return m_viscosity; }
 protected:
+    static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     bool m_gravityReactive = true;
     Vec2<float> m_initialPos;
     constexpr static float gravity = 9.81f;
@@ -79,6 +77,7 @@ protected:
     float m_viscosity = 1.f;
     Vec2<float> m_velocity;
     bool m_isKinematic = false;
+    std::mutex m_entityMutex;
 };
 
 class Player : public MoveableEntity

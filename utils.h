@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <SDL_rect.h>
+
 enum
 {
     SCREEN_WIDTH = 1280,
@@ -13,6 +15,11 @@ enum
     FIXED_UPDATE_TIME = 10 // ms
 };
 
+enum Axis_e
+{
+    x,
+    y
+};
 #pragma region floating SDL_Rect
 
 struct FRect

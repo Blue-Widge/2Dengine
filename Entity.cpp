@@ -1,6 +1,5 @@
 ﻿#include "Entity.h"
-
-#include <cmath>
+#include "EntityManager.h"
 
 Entity::Entity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                const FRect& p_rect) : m_id(p_id), m_renderer(p_renderer), m_rect(p_rect),
@@ -117,8 +116,8 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
 
 void MoveableEntity::rotate(const float p_rotationSpeed, const float p_deltaTime)
 {
+    const std::lock_guard<std::mutex> rotateGuard(this->m_entityMutex);
     m_rotationAngle += p_rotationSpeed * p_deltaTime;
-
     m_rotationAngle = fmod(m_rotationAngle, 360.f);
 }
 
@@ -129,15 +128,13 @@ void MoveableEntity::applyForces(const std::chrono::milliseconds p_fixedUpdateTi
         return;
 
     const float updateTime = static_cast<float>(p_fixedUpdateTime.count()) / 1000.0f;
+    
+    const std::lock_guard<std::mutex> forceGuard(this->m_entityMutex);
     const Vec2<float> velocity = m_entityManager->getEntityAppliedVelocity(*this, updateTime);
     float axisDeltaVelocity = velocity.x * m_mass * m_viscosity;
     move(Axis_e::x, axisDeltaVelocity, updateTime);
 
     axisDeltaVelocity = velocity.y * m_mass * m_viscosity;
-
-    // lock the access to the entity infos to the main thread to avoid
-    // incoherent behaviour
-    std::lock_guard<std::mutex> lock(m_entityManager->getEntitiesMutex());
 
     move(Axis_e::y, axisDeltaVelocity, updateTime);
     m_collider->updatePosition();
@@ -162,20 +159,26 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
         const float gravityDeltaVelocity = gravity * m_viscosity;
         const auto entities = m_entityManager->getEntities();
         const float gravityMovementThreshold = m_viscosity * gravity;
+        
+        //CHECK COLLISION WITH OTHER ENTITIES
         for (const auto entity : entities)
         {
             if (entity == this)
                 continue;
             const auto player = m_entityManager->getPlayer();
 
+            const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
+            
             if (m_collider->checkGroundCollision(*entity, p_deltaTime))
             {
                 if (this->m_id == player->m_id)
                 {
-                    m_velocity.y = 0.f;
+                    //TODO : check if relevant
+                    //m_velocity.y = 0.f;
                     player->setOnGround(true);
                     return;
                 }
+                
                 if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
                 {
                     if (typeid(*entity) == typeid(MoveableEntity))
@@ -189,11 +192,14 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
                 }
                 break;
             }
-            else if (this->m_id == player->m_id)
+            
+            if (this->m_id == player->m_id)
             {
                 player->setOnGround(false);
             }
         }
+        
+        const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
         m_velocity.y += gravityDeltaVelocity;
         move(Axis_e::y, m_velocity.y, p_deltaTime);
         m_collider->updatePosition();

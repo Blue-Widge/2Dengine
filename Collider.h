@@ -1,10 +1,7 @@
 ﻿#pragma once
-#include <SDL_rect.h>
-
 #include "utils.h"
 
 class Entity;
-class MoveableEntity;
 
 class Collider
 {

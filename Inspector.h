@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-class Player;
-class MoveableEntity;
 class Entity;
 
 class Inspector
