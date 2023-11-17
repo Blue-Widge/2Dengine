@@ -12,7 +12,7 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const
                                                 m_sceneRect(p_sceneRect), m_deltaTime(0.f),
                                                 m_loopBeginTime(0),
                                                 m_fixedUpdateTime(FIXED_UPDATE_TIME),
-                                                m_playingGame(false),
+                                                m_playingGame(true),
                                                 m_playingSDL(true),
                                                 m_inputManager(p_inputManager)
 {
@@ -23,7 +23,7 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const
     //auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 100, 50, 50}, 10.f);
     m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
     m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
-    auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 10.f);
+    auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 80.f);
     m_inputManager->setPlayerInstance(player);
 }
 
@@ -53,6 +53,7 @@ void Gameloop::update() const
     {
         moveableEntity->applyGravity(m_deltaTime);
     }
+    m_entityManager->solveInsidersEntities();
 }
 
 void Gameloop::fixedUpdate() const
@@ -62,11 +63,11 @@ void Gameloop::fixedUpdate() const
         if (!m_playingGame)
             return;
         auto startTime = std::chrono::steady_clock::now();
-        auto entities = m_entityManager->getMoveableEntities();
+        auto moveableEntities = m_entityManager->getMoveableEntities();
 
         //TODO: optimisation effectuate for loop on multiples threads
         
-        for (const auto entity : entities)
+        for (const auto entity : moveableEntities)
         {
             entity->applyForces(m_fixedUpdateTime);
         }

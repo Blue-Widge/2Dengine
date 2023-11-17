@@ -66,6 +66,24 @@ Vec2<T> operator -=(const Vec2<T>& p_first, const Vec2<T>& p_second)
 {
     return {p_first.x - p_second.x, p_first.y - p_second.y};
 }
+
+template <typename T>
+Vec2<T> operator*(float p_floatingPoint, const Vec2<T>& p_vec)
+{
+    Vec2<T> result = Vec2<T>({p_vec.x * p_floatingPoint, p_vec.y * p_floatingPoint});
+    return result;
+}
+
+template <typename T>
+Vec2<T> operator*(const Vec2<T>& p_vec, float p_floatingPoint)
+{
+    return p_floatingPoint * p_vec;
+}
+template <typename T>
+Vec2<T> operator/(const Vec2<T>& p_vec, float p_floatingPoint)
+{
+    return p_vec * (1.f / p_floatingPoint);
+}
 #pragma endregion
 
 #pragma region controls

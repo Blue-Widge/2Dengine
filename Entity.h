@@ -57,8 +57,9 @@ public:
     void setRotation(float p_rotationAngle);
     void setSize(float p_w, float p_h);
     void move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime);
+    void move(float p_deltaTime);
     void rotate(float p_rotationSpeed, float p_deltaTime);
-    void applyForces(std::chrono::milliseconds p_fixedUpdateTime);
+    void applyForces(const std::chrono::milliseconds p_fixedUpdateTime);
     inline float getMass() const { return m_mass; }
     inline bool getIsGravityReactive() const { return m_gravityReactive; }
     inline Vec2<float> getVelocity() const { return m_velocity; }
@@ -68,6 +69,8 @@ public:
     inline bool getIsKinematic() const { return m_isKinematic; }
     inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline float getViscosity() const { return m_viscosity; }
+    inline std::mutex& getMutex() { return m_entityMutex; }
+
 protected:
     static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     bool m_gravityReactive = true;
@@ -92,10 +95,13 @@ public:
     inline void setYVelocity(const float p_y) {m_velocity.y = p_y;}
     void applyMovements(float p_deltaTime);
     std::string prepareEntityInfos() const override;
+    inline void setXCounterSpeed(const float& p_counterSpeed) { m_xCounterSpeed = p_counterSpeed; }
+
 private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,
                               float p_viscosity);
     static Player* m_instance;
     bool m_onGround = false;
+    float m_xCounterSpeed;
 };

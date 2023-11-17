@@ -7,6 +7,8 @@ EntityManager::~EntityManager()
         delete entity;
         entity = nullptr;
     }
+    m_entities.clear();
+    m_moveableEntities.clear();
 }
 
 Entity* EntityManager::addEntity()
@@ -24,6 +26,7 @@ Entity* EntityManager::addEntity(const char* p_texturePath, const FRect& p_rect)
     auto* entity = new Entity(this, m_nbEntities, m_renderer, p_texturePath, p_rect);
     ++m_nbEntities;
     m_entities.push_back(entity);
+    m_unmoveableEntities.push_back(entity);
 
     return entity;
 }
@@ -44,26 +47,9 @@ Player* EntityManager::addPlayer(const char* p_texturePath, const FRect& p_rect,
         p_mass, 0.81f);
     ++m_nbEntities;
     m_entities.push_back(entity);
+    m_moveableEntities.push_back(entity);
     m_player = entity;
     return entity;
-}
-
-
-Vec2<float> EntityManager::getEntityAppliedVelocity(const MoveableEntity& p_moveableEntity,
-                                                    const float p_deltaTime) const
-{
-    Vec2<float> appliedVelocity = {0.f, 0.f};
-    if (p_moveableEntity.getIsKinematic())
-        return appliedVelocity;
-    for (const auto entity : m_entities)
-    {
-        if (*entity == p_moveableEntity)
-            continue;
-        const Vec2<float> currVelocity = p_moveableEntity.getCollider()->checkCollisions(*entity, p_deltaTime);
-        appliedVelocity.x += currVelocity.x;
-        appliedVelocity.y += currVelocity.y;
-    }
-    return appliedVelocity;
 }
 
 void EntityManager::resetEntities() const
@@ -80,5 +66,60 @@ void EntityManager::deleteEntities() const
     {
         delete entity;
         entity = nullptr;
+    }
+}
+
+void EntityManager::solveInsidersEntities() const
+{
+    for(MoveableEntity* moveableEntity : m_moveableEntities)
+    {
+        if (moveableEntity->getIsKinematic())
+            continue;
+        
+        Collider* moveableEntityCollider = moveableEntity->getCollider();
+        const FRect& moveableEntityColliderRect = moveableEntityCollider->getColliderRect();
+        const Vec2<float> moveableEntityPosition = moveableEntity->getPosition();
+        std::mutex& moveableEntityMutex = moveableEntity->getMutex();
+        for(const Entity* entity : m_entities)
+        {
+            if (moveableEntity == entity || entity == m_player)
+                continue;
+            Collider* entityCollider = entity->getCollider();
+            const FRect& entityColliderRect = entityCollider->getColliderRect();
+
+            std::lock_guard<std::mutex> insidersLock(moveableEntityMutex);
+            constexpr float epsilonValue = 1.f;
+            const float halfX = 3.f * moveableEntityColliderRect.w / 4.f;
+            const float halfY = 3.f * moveableEntityColliderRect.h / 4.f;
+            if (moveableEntityColliderRect.x + halfX + epsilonValue < entityColliderRect.x ||
+                moveableEntityColliderRect.x + moveableEntityColliderRect.w - (halfX + epsilonValue) > entityColliderRect.x + entityColliderRect.w ||
+                moveableEntityColliderRect.y + halfY + epsilonValue < entityColliderRect.y ||
+                moveableEntityColliderRect.y + moveableEntityColliderRect.h - (halfY + epsilonValue) > entityColliderRect.y + entityColliderRect.h)
+                    continue;
+            const Vec2<float> moveableEntityVelocity = moveableEntity->getVelocity();
+            if (moveableEntityVelocity.x <= -epsilonValue)
+            {
+                moveableEntity->setPosition(entityColliderRect.x + entityColliderRect.w + epsilonValue,
+                    moveableEntityPosition.y);
+                moveableEntityCollider->updatePosition();
+            }
+            else if (moveableEntityVelocity.x >= epsilonValue)
+            {
+                moveableEntity->setPosition(entityColliderRect.x - moveableEntityColliderRect.w - epsilonValue,
+                    moveableEntityPosition.y);
+                moveableEntityCollider->updatePosition();
+            }
+            if (moveableEntityVelocity.y <= -epsilonValue)
+            {
+                moveableEntity->setPosition(moveableEntityPosition.x, entityColliderRect.y + entityColliderRect.h
+                    + epsilonValue);
+                moveableEntityCollider->updatePosition();
+            }
+            else if (moveableEntityVelocity.y >= epsilonValue)
+            {
+                moveableEntity->setPosition(moveableEntityPosition.x, entityColliderRect.y - moveableEntityColliderRect.h - epsilonValue);
+                moveableEntityCollider->updatePosition();
+            }
+        }
     }
 }

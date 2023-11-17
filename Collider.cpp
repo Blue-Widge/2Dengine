@@ -38,46 +38,51 @@ void BoxCollider::setRotation(const float p_rotationAngle)
     m_rotation = p_rotationAngle;
 }
 
-Vec2<float> BoxCollider::checkCollisions(const Entity& p_otherEntity, const float p_deltaTime)
+bool BoxCollider::checkXCollisions(const Entity* p_otherEntity, const float p_deltaTime)
 {
-    Vec2<float> velocity = {0, 0};
-    const FRect otherColliderRect = p_otherEntity.getCollider()->getColliderRect();
+    const FRect& otherColliderRect = p_otherEntity->getCollider()->getColliderRect();
     const MoveableEntity* parent = reinterpret_cast<MoveableEntity*>(m_parent);
     const Vec2<float> currVelocity = parent->getVelocity();
-    const float parentViscosity = parent->getViscosity();
 
     const float nextXMove = currVelocity.x * p_deltaTime;
-
+    
+    const float spriteYMiddle = m_rect.y + m_rect.h / 2.f;
+    
     //From the left to the right
     if (m_rect.x + m_rect.w + nextXMove >= otherColliderRect.x &&
-        m_rect.x + m_rect.w < otherColliderRect.x &&
-        m_rect.y >= otherColliderRect.y && m_rect.y <= otherColliderRect.y + otherColliderRect.h )
-            velocity.x -= currVelocity.x * parentViscosity;
+        m_rect.x < otherColliderRect.x + otherColliderRect.w &&
+        spriteYMiddle <= otherColliderRect.y + otherColliderRect.h && spriteYMiddle >= otherColliderRect.y )
+            return true;
 
     //from the right to the left
-    if (otherColliderRect.x + otherColliderRect.w <= m_rect.x + nextXMove &&
-        otherColliderRect.x + otherColliderRect.w > m_rect.x &&
-        m_rect.y >= otherColliderRect.y && m_rect.y <= otherColliderRect.y + otherColliderRect.h )
-            velocity.y -=  currVelocity.y * parentViscosity;
-
-    //from down to up
-    const float nextYMove = currVelocity.y * p_deltaTime;
-    if (m_rect.y + nextYMove <= otherColliderRect.y + otherColliderRect.h &&
-        m_rect.y > otherColliderRect.y + otherColliderRect.h &&
-        m_rect.x > otherColliderRect.x && m_rect.x <= otherColliderRect.x + otherColliderRect.w)
-            velocity.y -= currVelocity.y * parentViscosity;
-
-    return velocity;
+    if (m_rect.x + nextXMove <= otherColliderRect.x + otherColliderRect.w  &&
+        m_rect.x > otherColliderRect.x &&
+        spriteYMiddle <= otherColliderRect.y + otherColliderRect.h && spriteYMiddle >= otherColliderRect.y )
+            return true;
+    return false;
 }
 
 bool BoxCollider::checkGroundCollision(const Entity& p_otherEntity, const float p_deltaTime)
 {
-    const FRect otherColliderRect = p_otherEntity.getCollider()->getColliderRect();
+    const FRect& otherColliderRect = p_otherEntity.getCollider()->getColliderRect();
     const float nextYMove = reinterpret_cast<MoveableEntity*>(m_parent)->getVelocity().y * p_deltaTime;
     if (m_rect.y + m_rect.h + nextYMove >= otherColliderRect.y &&
             m_rect.y < otherColliderRect.y + otherColliderRect.h &&
             (m_rect.x >= otherColliderRect.x && m_rect.x <= otherColliderRect.x + otherColliderRect.w ||
             m_rect.x + m_rect.w >= otherColliderRect.x && m_rect.x + m_rect.w <= otherColliderRect.x + otherColliderRect.w))
         return true;
+    return false;
+}
+
+bool BoxCollider::checkUpperCollisions(const Entity* p_otherEntity, float p_deltaTime)
+{
+    const Vec2<float> currVelocity = reinterpret_cast<MoveableEntity*>(m_parent)->getVelocity();
+    const FRect& otherColliderRect = p_otherEntity->getCollider()->getColliderRect();
+    //from down to up
+    const float nextYMove = currVelocity.y * p_deltaTime;
+    if (m_rect.y + nextYMove <= otherColliderRect.y + otherColliderRect.h &&
+        m_rect.y > otherColliderRect.y &&
+        m_rect.x >= otherColliderRect.x && m_rect.x <= otherColliderRect.x + otherColliderRect.w)
+            return true;
     return false;
 }

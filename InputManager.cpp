@@ -87,7 +87,7 @@ void InputManager::sendControls() const
 
     if (m_controls[UP])
         if (m_player->getOnGround())
-            m_player->setYVelocity(-1500.f);
+            m_player->setYVelocity(-1000.f);
     if (m_controls[RIGHT])
         m_player->setXVelocity(50.f);
     if (m_controls[LEFT])

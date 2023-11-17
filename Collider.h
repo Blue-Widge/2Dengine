@@ -13,9 +13,10 @@ public:
     virtual void updateDeltaPos() { }
     virtual void setDimensions(const float p_width, const float p_height) { }
     virtual void setRotation(float p_rotationAngle) { }
-    virtual Vec2<float> checkCollisions(const Entity& p_otherEntity, float p_deltaTime) { return {};}
+    virtual bool checkXCollisions(const Entity* p_otherEntity, float p_deltaTime) { return {};}
+    virtual bool checkUpperCollisions(const Entity* p_otherEntity, float p_deltaTime) { return {};}
     virtual bool checkGroundCollision(const Entity& p_otherEntity, float p_deltaTime) { return {};}
-    FRect getColliderRect() const { return m_rect; }
+    FRect& getColliderRect() { return m_rect; }
 protected:
     Entity* m_parent;
     FRect m_rect = {0,0,0,0};
@@ -33,6 +34,7 @@ public:
     void updateDeltaPos() override;
     void setDimensions(float p_width, float p_height) override;
     void setRotation(float p_rotationAngle) override;
-    Vec2<float> checkCollisions(const Entity& p_otherEntity, float p_deltaTime) override;
+    bool checkXCollisions(const Entity* p_otherEntity, float p_deltaTime) override;
     bool checkGroundCollision(const Entity& p_otherEntity, float p_deltaTime) override;
+    bool checkUpperCollisions(const Entity* p_otherEntity, float p_deltaTime) override;
 };

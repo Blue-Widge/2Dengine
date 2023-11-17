@@ -114,6 +114,12 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
     m_collider->updatePosition();
 }
 
+void MoveableEntity::move(const float p_deltaTime)
+{
+    move(Axis_e::x, m_velocity.x, p_deltaTime);
+    move(Axis_e::y, m_velocity.y, p_deltaTime);
+}
+
 void MoveableEntity::rotate(const float p_rotationSpeed, const float p_deltaTime)
 {
     const std::lock_guard<std::mutex> rotateGuard(this->m_entityMutex);
@@ -123,27 +129,51 @@ void MoveableEntity::rotate(const float p_rotationSpeed, const float p_deltaTime
 
 void MoveableEntity::applyForces(const std::chrono::milliseconds p_fixedUpdateTime)
 {
-    //no fixedUpdateTime means that the thread hasn't started
-    if (p_fixedUpdateTime.count() == 0 || m_isKinematic)
+    if (m_isKinematic)
         return;
 
     const float updateTime = static_cast<float>(p_fixedUpdateTime.count()) / 1000.0f;
-    
+    Player* player = m_entityManager->getPlayer();
+    Collider* collider = this->getCollider();
     const std::lock_guard<std::mutex> forceGuard(this->m_entityMutex);
-    const Vec2<float> velocity = m_entityManager->getEntityAppliedVelocity(*this, updateTime);
-    float axisDeltaVelocity = velocity.x * m_mass * m_viscosity;
-    move(Axis_e::x, axisDeltaVelocity, updateTime);
 
-    axisDeltaVelocity = velocity.y * m_mass * m_viscosity;
-
-    move(Axis_e::y, axisDeltaVelocity, updateTime);
-    m_collider->updatePosition();
+    player->setXCounterSpeed(0.f);
+    for (MoveableEntity* otherEntity : m_entityManager->getMoveableEntities() )
+    {
+        if (otherEntity == this || otherEntity == player)
+            continue;
+        
+        if (!collider->checkXCollisions(otherEntity, updateTime) && !collider->checkUpperCollisions(otherEntity, updateTime))
+            continue;
+        
+        const float otherEntityMass = otherEntity->getMass();
+        Vec2<float> otherEntityVelocity = otherEntity->getVelocity();
+        Vec2<float> relativeVelocity = otherEntityVelocity - m_velocity;
+        if (relativeVelocity.x < 0.1f && relativeVelocity.x > -0.1f && relativeVelocity.y < 0.1f && relativeVelocity.y > -0.1f)
+            continue;
+        Vec2<float> impulse = (m_mass * relativeVelocity + otherEntityMass * otherEntityVelocity) /
+                (m_mass + otherEntityMass);
+        if (this == player)
+            player->setXCounterSpeed(impulse.x - 50.f);
+        else
+            applyForceTo(this, impulse);
+        
+        applyForceTo(otherEntity, -1.f * impulse);
+        move(updateTime);
+        otherEntity->move(updateTime);
+        applyForceTo(otherEntity, -1.f * otherEntity->m_velocity * otherEntity->m_viscosity);
+    }
 }
 
 void MoveableEntity::applyForceTo(MoveableEntity* p_entity, const Vec2<float> p_velocity)
 {
     p_entity->m_velocity.x += p_velocity.x;
     p_entity->m_velocity.y += p_velocity.y;
+    const float movementThreshold = p_entity->m_viscosity * 0.15f;
+    if (p_entity->m_velocity.x < movementThreshold && p_entity->m_velocity.x > -movementThreshold)
+        p_entity->m_velocity.x = 0.f;   
+    if (p_entity->m_velocity.y < movementThreshold && p_entity->m_velocity.y > -movementThreshold)
+        p_entity->m_velocity.y = 0.f;
 }
 
 void MoveableEntity::resetEntity()
@@ -169,12 +199,11 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
 
             const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
             
-            if (m_collider->checkGroundCollision(*entity, p_deltaTime))
+            if (!m_isKinematic && m_collider->checkGroundCollision(*entity, p_deltaTime))
             {
-                if (this->m_id == player->m_id)
+                if (this == player)
                 {
-                    //TODO : check if relevant
-                    //m_velocity.y = 0.f;
+                    m_velocity.y = 0.f;
                     player->setOnGround(true);
                     return;
                 }
@@ -193,7 +222,7 @@ void MoveableEntity::applyGravity(const float p_deltaTime)
                 break;
             }
             
-            if (this->m_id == player->m_id)
+            if (this == player)
             {
                 player->setOnGround(false);
             }
@@ -231,7 +260,7 @@ Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p
 
 void Player::applyMovements(const float p_deltaTime)
 {
-    move(Axis_e::x, m_velocity.x, p_deltaTime);
+    move(Axis_e::x, m_velocity.x - m_xCounterSpeed, p_deltaTime);
     m_collider->updatePosition();
 }
 
@@ -242,6 +271,6 @@ std::string Player::prepareEntityInfos() const
 
 Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer,
                const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) : MoveableEntity(
-    p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity)
+    p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity), m_xCounterSpeed(0.f)
 {
 }
