@@ -207,6 +207,7 @@
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Gameloop.cpp" />
     <ClCompile Include="GameStateButtons.cpp" />
+    <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="SDLHandler.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="Gameloop.h" />
     <ClInclude Include="GameStateButtons.h" />
+    <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Inspector.h" />
     <ClInclude Include="SDLHandler.h" />

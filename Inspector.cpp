@@ -164,6 +164,4 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y) const
     SDL_HideWindow(inputWindow);
     SDL_DestroyRenderer(inputRenderer);
     SDL_DestroyWindow(inputWindow);
-
-    
 }

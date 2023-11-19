@@ -86,6 +86,7 @@ bool SDLHandler::initSDL()
     m_gameStateButtons = new GameStateButtons(m_renderer, m_gameloop);
     m_inputManager->setGameloopObject(m_gameloop);
     m_inputManager->setGameStateButtonsObject(m_gameStateButtons);
+    m_hierarchy = new Hierarchy(m_renderer, m_font, m_gameloop->getEntityManager());
     return true;
 }
 
@@ -107,7 +108,7 @@ void SDLHandler::loop() const
         if (!m_gameloop->getPlayingGame())
         {
             m_inspector->displayInspector();
-            //TODO: display hierarchy
+            m_hierarchy->displayHierarchy();
             //TODO: display block placements
         }
             m_gameStateButtons->displayGameStateButtons();

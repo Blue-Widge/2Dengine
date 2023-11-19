@@ -27,7 +27,7 @@ public:
     void stopGame();
     inline bool& getPlayingGame() { return m_playingGame; }
     Entity* getEntityFromPos(const int p_x, const int p_y) const;
-
+    inline  EntityManager* getEntityManager() const { return m_entityManager; }
     void checkCollectibles();
 private:
     SDL_Renderer* m_renderer;
