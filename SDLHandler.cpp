@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Entity.h"
+#include "EntityChooser.h"
 
 SDLHandler* SDLHandler::instance = nullptr;
 
@@ -83,16 +84,18 @@ bool SDLHandler::initSDL()
     m_inspector = new Inspector(m_renderer, m_font);
     m_inputManager = new InputManager(&m_isActivated, m_inspector);
     m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);
-    m_gameStateButtons = new GameStateButtons(m_renderer, m_gameloop);
     m_inputManager->setGameloopObject(m_gameloop);
+    m_gameStateButtons = new GameStateButtons(m_renderer, m_gameloop);
     m_inputManager->setGameStateButtonsObject(m_gameStateButtons);
     m_hierarchy = new Hierarchy(m_renderer, m_font, m_gameloop->getEntityManager());
+    m_entityChooser = new EntityChooser(m_renderer, m_gameloop->getEntityManager(), m_hierarchy);
+    m_inputManager->setEntityChooser(m_entityChooser);
     return true;
 }
 
 bool SDLHandler::loadFont()
 {
-    m_font = TTF_OpenFont("./Font/segoeui.ttf", 20);
+    m_font = TTF_OpenFont(BASE_FONT, 20);
     return (m_font == nullptr);
 }
 
@@ -109,7 +112,7 @@ void SDLHandler::loop() const
         {
             m_inspector->displayInspector();
             m_hierarchy->displayHierarchy();
-            //TODO: display block placements
+            m_entityChooser->displayEntityChooser();
         }
             m_gameStateButtons->displayGameStateButtons();
         SDL_RenderPresent(m_renderer);

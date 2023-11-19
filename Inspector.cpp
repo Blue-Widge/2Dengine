@@ -11,7 +11,7 @@ Inspector::Inspector(SDL_Renderer* p_renderer, TTF_Font* p_font) :
 m_renderer(p_renderer), m_font(p_font), m_selectionRect({0})
 {
     m_rect = {HIERARCHY_WIDTH + SCENE_WIDTH, 0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT};
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT, 32, 0, 0, 0, 0);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, m_rect.w, m_rect.h, 32, 0, 0, 0, 0);
     const SDL_Rect temp = {0, 0, m_rect.w, m_rect.h};
     SDL_FillRect(surface, &temp, SDL_MapRGBA(surface->format, 255, 0, 0, 255));
     m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);

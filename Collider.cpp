@@ -43,9 +43,10 @@ bool BoxCollider::checkGroundCollision(const Entity* p_otherEntity, const float 
     const FRect& otherColliderRect = p_otherEntity->getCollider()->getColliderRect();
     const float nextYMove = reinterpret_cast<MoveableEntity*>(m_parent)->getVelocity().y * p_deltaTime;
     if (m_rect.y + m_rect.h + nextYMove + g_epsilonValue >= otherColliderRect.y &&
-            m_rect.y + m_rect.h - g_epsilonValue <= otherColliderRect.y &&
-            m_rect.x + m_rect.w + g_epsilonValue >= otherColliderRect.x && m_rect.x - g_epsilonValue <= otherColliderRect.x + otherColliderRect.w)
-                return true;
+        m_rect.y + m_rect.h - g_epsilonValue <= otherColliderRect.y + otherColliderRect.h &&
+        m_rect.x + m_rect.w - g_epsilonValue > otherColliderRect.x + g_epsilonValue &&
+        m_rect.x + g_epsilonValue < otherColliderRect.x + otherColliderRect.w - g_epsilonValue)
+        return true;
     return false;
 }
 
@@ -57,7 +58,8 @@ bool BoxCollider::checkUpperCollisions(const Entity* p_otherEntity, const float 
     //from down to up
     if (m_rect.y + nextYMove - g_epsilonValue <= otherColliderRect.y + otherColliderRect.h &&
         m_rect.y + g_epsilonValue >= otherColliderRect.y &&
-        m_rect.x + m_rect.w + g_epsilonValue >= otherColliderRect.x && m_rect.x - g_epsilonValue <= otherColliderRect.x + otherColliderRect.w)
+        m_rect.x + m_rect.w - g_epsilonValue > otherColliderRect.x + g_epsilonValue &&
+        m_rect.x + g_epsilonValue < otherColliderRect.x + otherColliderRect.w - g_epsilonValue)
             return true;
     return false;
 }
@@ -70,7 +72,8 @@ bool BoxCollider::checkLeftCollisions(const Entity* p_otherEntity, const float p
     //from the right to the left
     if (m_rect.x + nextXMove - g_epsilonValue <= otherColliderRect.x + otherColliderRect.w  &&
         m_rect.x + g_epsilonValue >= otherColliderRect.x &&
-        m_rect.y + m_rect.h + g_epsilonValue >= otherColliderRect.y && m_rect.y + m_rect.w - g_epsilonValue <= otherColliderRect.y + otherColliderRect.h)
+        m_rect.y + m_rect.h - g_epsilonValue > otherColliderRect.y + g_epsilonValue &&
+        m_rect.y + g_epsilonValue < otherColliderRect.y + otherColliderRect.h - g_epsilonValue)
             return true;
     return false;
 }
@@ -83,7 +86,8 @@ bool BoxCollider::checkRightCollisions(const Entity* p_otherEntity, const float 
     //From the left to the right
     if (m_rect.x + m_rect.w + nextXMove + g_epsilonValue >= otherColliderRect.x &&
         m_rect.x + m_rect.w - g_epsilonValue <= otherColliderRect.x + otherColliderRect.w &&
-        m_rect.y + m_rect.h + g_epsilonValue >= otherColliderRect.y && m_rect.y + m_rect.w - g_epsilonValue <= otherColliderRect.y + otherColliderRect.h)
+        m_rect.y + m_rect.h - g_epsilonValue >= otherColliderRect.y + g_epsilonValue &&
+        m_rect.y + g_epsilonValue <= otherColliderRect.y + otherColliderRect.h - g_epsilonValue)
             return true;
     return false;
 }

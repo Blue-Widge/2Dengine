@@ -4,6 +4,15 @@
 
 #include "EntityManager.h"
 
+struct EntityInfo
+{
+    EntityInfo(SDL_Texture* p_textTexture, SDL_Rect p_textRect, const Entity* p_entityPtr) :
+        m_textTexture(p_textTexture), m_textRect(p_textRect), m_entityPtr(p_entityPtr) {}
+    SDL_Texture* m_textTexture;
+    SDL_Rect m_textRect;
+    const Entity* m_entityPtr;
+};
+
 class Hierarchy
 {
 public:
@@ -21,10 +30,9 @@ private:
     SDL_Texture* m_titleTexture;
     SDL_Rect m_titleRect;
     
-    SDL_Texture* m_infosTexture;
     Vec2<int> m_infosPos;
     
     EntityManager* m_entityManager;
     std::string m_hierarchyInfos;
-    std::vector<std::tuple<SDL_Texture*, SDL_Rect>> m_infosTextureAndRect;
+    std::vector<EntityInfo> m_entityInfos;
 };

@@ -124,9 +124,8 @@ Entity* Gameloop::getEntityFromPos(int p_x, const int p_y) const
     for (Entity* entity : entities)
     {
         const auto entityRect = entity->getEntityRect();
-        if (p_x >= entityRect.x && p_x <= entityRect.x + entityRect.w &&
-            p_y >= entityRect.y && p_y <= entityRect.y + entityRect.h)
-                return entity;
+        if (detectButtonClicked(p_x, p_y, convertFRect(entityRect)))
+            return entity;
     }
     return nullptr;
 }

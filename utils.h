@@ -17,7 +17,7 @@ enum
     FIXED_UPDATE_TIME = 10, // ms
 };
 
-constexpr float g_epsilonValue = 0.8f;
+constexpr float g_epsilonValue = 0.75f;
 /* TODO : change from small scene width to full when playing
 int g_sceneWidth = SCENE_WIDTH;
 int g_sceneHeight = SCENE_HEIGHT;   
@@ -113,4 +113,12 @@ constexpr Uint8 controlsNb = 5;
 #define BASE_TEXTURE "./images/baseTexture.png"
 #define BASE_PLAYER_TEXTURE "./images/playerTexture.png"
 #define BASE_COLLECTIBLE_TEXTURE "./images/coin.png"
-#pragma endregion 
+#pragma endregion
+
+#define BASE_FONT "./Font/segoeui.ttf"
+
+inline bool detectButtonClicked(const int p_x, const int p_y, const SDL_Rect& p_rect)
+{
+    return p_x >= p_rect.x && p_x <= p_rect.x + p_rect.w &&
+        p_y >= p_rect.y && p_y <= p_rect.y + p_rect.h;
+}

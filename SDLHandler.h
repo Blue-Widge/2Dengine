@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "EntityChooser.h"
 #include "SDL.h"
 #include "utils.h"
 #include "Inspector.h"
@@ -37,4 +38,5 @@ private:
     GameStateButtons* m_gameStateButtons;
     const SDL_Rect m_sceneRect = {(SCREEN_WIDTH - SCENE_WIDTH) / 2, 0, SCENE_WIDTH, SCENE_HEIGHT};
     TTF_Font* m_font;
+    EntityChooser* m_entityChooser;
 };

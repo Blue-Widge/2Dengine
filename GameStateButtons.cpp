@@ -41,25 +41,24 @@ void GameStateButtons::displayGameStateButtons() const
     SDL_RenderCopy(m_renderer, m_stopTexture, nullptr, &m_stopRect);
 }
 
-void GameStateButtons::detectPressedButtons(const int p_x, const int p_y) const
+bool GameStateButtons::detectPressedButtons(const int p_x, const int p_y) const
 {
-    if (p_x >= m_playRect.x && p_x <= m_playRect.x + m_playRect.w &&
-        p_y >= m_playRect.y && p_y <= m_playRect.y + m_playRect.h)
+    if (detectButtonClicked(p_x, p_y, m_playRect))
     {
         m_gameLoop->playGame();
-        return;
+        return true;
     }
 
-    if (p_x >= m_pauseRect.x && p_x <= m_pauseRect.x + m_pauseRect.w &&
-        p_y >= m_pauseRect.y && p_y <= m_pauseRect.y + m_pauseRect.h)
+    if (detectButtonClicked(p_x, p_y, m_pauseRect))
     {
         m_gameLoop->pauseGame();
-        return;
+        return true;
     }
 
-    if (p_x >= m_stopRect.x && p_x <= m_stopRect.x + m_stopRect.w &&
-        p_y >= m_stopRect.y && p_y <= m_stopRect.y + m_stopRect.h)
+    if (detectButtonClicked(p_x, p_y, m_stopRect))
     {
         m_gameLoop->stopGame();
+        return true;
     }
+    return false;
 }

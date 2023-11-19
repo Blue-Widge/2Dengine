@@ -52,6 +52,7 @@ public:
     MoveableEntity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                    const FRect& p_rect, float p_mass, float p_viscosity);
     void setPosition(float p_x, float p_y);
+    inline void setVelocity(const Vec2<float> p_velocity) { m_velocity = p_velocity; }
     void setPositionKeepingInitialPos(float p_x, float p_y);
     void move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime);
     void move(float p_deltaTime);
@@ -107,7 +108,7 @@ public:
         m_isKinematic = true;
         m_textureSave = m_texture;
     }
-    std::string prepareEntityInfos() const override { return Entity::prepareEntityInfos(); }
+    std::string prepareEntityInfos() const override;
     void detectCollected(const FRect& p_playerRect);
     inline bool getIsCollected() const { return m_isCollected; }
     void resetEntity();

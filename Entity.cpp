@@ -56,13 +56,14 @@ std::string Entity::prepareEntityInfos() const
     const SDL_Rect colliderRect = convertFRect(getCollider()->getColliderRect());
 
     //no need to recreate these variables at runtime but I don't see them as object's attribute
-    const std::string entityInfosString = "Entity's ID : " + to_string(m_id) + "\n"
+    std::string entityInfosString = "Entity's ID : " + to_string(m_id) + "\n"
         "Entity's position : " + "x : " + to_string(entityRect.x) + " y : " + to_string(entityRect.y) + "\n"
         "Entity's rotation : " + to_string(m_rotationAngle) + "\n"
         "Entity's size : " + "x : " + to_string(entityRect.w) + " y : " + to_string(entityRect.h) + "\n"
         "Collider's position : " + "x : " + to_string(colliderRect.x) + " y : " + to_string(colliderRect.y) +
         "\n"
         "Collider's size : " + "w : " + to_string(colliderRect.w) + " h : " + to_string(colliderRect.h) + "\n"
+        "Is kinematic : " + to_string(m_isKinematic) + "\n"
         "Entity's texture : \n";
     return entityInfosString;
 }
@@ -189,48 +190,43 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
     if (m_gravityReactive)
     {
         const float gravityDeltaVelocity = gravity * m_viscosity;
-        const auto entities = m_entityManager->getStaticEntities();
+        const auto entities = m_entityManager->getEntities();
         const float gravityMovementThreshold = m_viscosity * gravity;
+        const auto player = m_entityManager->getPlayer();
         
         //CHECK COLLISION WITH OTHER ENTITIES
         for (const auto entity : entities)
         {
             if (entity == this)
                 continue;
-            const auto player = m_entityManager->getPlayer();
 
             const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
             
-            if (!m_isKinematic && m_collider->checkGroundCollision(entity, p_deltaTime))
-            {
-                if (this == player)
-                {
-                    m_velocity.y = 0.f;
-                    player->setOnGround(true);
-                    return;
-                }
-                
-                if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
-                {
-                    if (typeid(*entity) == typeid(MoveableEntity))
-                        applyForceTo(reinterpret_cast<MoveableEntity*>(entity), {0.f, m_viscosity * m_mass});
-                    m_velocity.y *= -m_viscosity;
-                }
-                else
-                {
-                    m_velocity.y = 0.f;
-                    return;
-                }
-                break;
-            }
-            
+            if (m_isKinematic || entity->getIsKinematic() || !m_collider->checkGroundCollision(entity, p_deltaTime))
+                continue;
+
             if (this == player)
             {
-                player->setOnGround(false);
+                m_velocity.y = 0.f;
+                player->setOnGround(true);
+                return;
+            }
+            
+            if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
+            {
+                if (typeid(*entity) == typeid(MoveableEntity))
+                    applyForceTo(reinterpret_cast<MoveableEntity*>(entity), {0.f, m_viscosity * m_mass});
+                m_velocity.y *= -m_viscosity;
+            }
+            else
+            {
+                m_velocity.y = 0.f;
+                return;
             }
         }
-        
         const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
+        if (this == player)
+            player->setOnGround(false);
         m_velocity.y += gravityDeltaVelocity;
         move(Axis_e::y, m_velocity.y, p_deltaTime);
         m_collider->updatePosition();
@@ -239,7 +235,8 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
 
 std::string MoveableEntity::prepareEntityInfos() const
 {
-    const std::string moveableEntityInfosString = Entity::prepareEntityInfos() +
+    std::string moveableEntityInfosString = Entity::prepareEntityInfos() +
+        "Entity's velocity : x : " + to_string(m_velocity.x) + " y : " + to_string(m_velocity.y) + "\n"
         "Entity's mass : " + to_string(m_mass) + "kg\n"
         "Entity's viscosity : " + to_string(m_viscosity) + "\n"
         "Gravity reactive : " + to_string(m_gravityReactive) + "\n"
@@ -254,9 +251,11 @@ Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p
                                   const float p_viscosity)
 {
     if (m_instance == nullptr)
-        return new Player(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity);
-    m_instance->m_mass = p_mass;
-    m_instance->m_viscosity = p_viscosity;
+    {
+        m_instance = new Player(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity);
+        return m_instance;
+    }
+    
     return m_instance;
 }
 
@@ -268,7 +267,8 @@ void Player::applyMovements(const float p_deltaTime)
 
 std::string Player::prepareEntityInfos() const
 {
-    return MoveableEntity::prepareEntityInfos();
+    return MoveableEntity::prepareEntityInfos() +
+        "On ground : " + to_string(m_onGround) + '\n';
 }
 
 void Player::resetEntity()
@@ -283,13 +283,30 @@ Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_rend
 {
 }
 
+std::string Collectible::prepareEntityInfos() const
+{
+    const std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
+    unsigned short int count = 1;
+    for(const Collectible* collectible : collectibles)
+    {
+        if (collectible == this)
+            break;
+        count++;
+    }
+    std::string collectibleInfos = Entity::prepareEntityInfos() +
+            "Collectible N°" + to_string(count) + "/" + to_string(collectibles.size()) + "\n";
+    return collectibleInfos;
+}
+
 void Collectible::detectCollected(const FRect& p_playerRect)
 {
     if (m_isCollected)
         return;
 
-    m_isCollected = (m_rect.x >= p_playerRect.x && m_rect.x <= p_playerRect.x + p_playerRect.w &&
-        m_rect.y >= p_playerRect.y && m_rect.y <= p_playerRect.y + p_playerRect.h);
+    m_isCollected = (m_rect.x + m_rect.w >= p_playerRect.x &&
+        m_rect.x <= p_playerRect.x + p_playerRect.w &&
+        m_rect.y + m_rect.h >= p_playerRect.y &&
+        m_rect.y <= p_playerRect.y + p_playerRect.h);
     if (m_isCollected)
         m_texture = SDL_CreateTexture(m_renderer, SDL_TEXTUREACCESS_STATIC, 0, 0, 0);
 }
@@ -297,4 +314,5 @@ void Collectible::detectCollected(const FRect& p_playerRect)
 void Collectible::resetEntity()
 {
     m_texture = m_textureSave;
+    m_isCollected = false;
 }
