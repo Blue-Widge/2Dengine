@@ -26,7 +26,7 @@ Entity* EntityManager::addEntity(const char* p_texturePath, const FRect& p_rect)
     auto* entity = new Entity(this, m_nbEntities, m_renderer, p_texturePath, p_rect);
     ++m_nbEntities;
     m_entities.push_back(entity);
-    m_unmoveableEntities.push_back(entity);
+    m_staticEntities.push_back(entity);
 
     return entity;
 }
@@ -44,7 +44,7 @@ MoveableEntity* EntityManager::addMoveableEntity(const char* p_texturePath, cons
 Player* EntityManager::addPlayer(const char* p_texturePath, const FRect& p_rect, const float p_mass)
 {
     auto* entity = Player::getPlayerInstance(this, m_nbEntities, m_renderer, p_texturePath, p_rect,
-        p_mass, 0.81f);
+        p_mass, 0.3f);
     ++m_nbEntities;
     m_entities.push_back(entity);
     m_moveableEntities.push_back(entity);
@@ -52,74 +52,102 @@ Player* EntityManager::addPlayer(const char* p_texturePath, const FRect& p_rect,
     return entity;
 }
 
+Collectible* EntityManager::addCollectible(const char* p_texturePath, const FRect& p_rect)
+{
+    auto* collectible = new Collectible(this, m_nbEntities, m_renderer, p_texturePath, p_rect);
+    ++m_nbEntities;
+    m_entities.push_back(collectible);
+    m_collectibles.push_back(collectible);
+    return collectible;
+}
+
 void EntityManager::resetEntities() const
 {
     for (const auto entity : m_moveableEntities)
-    {
         entity->resetEntity();
-    }
+    
+    for (const auto collectible : m_collectibles)
+        collectible->resetEntity();
 }
 
 void EntityManager::deleteEntities() const
 {
-    for (auto entity : m_entities)
+    for (const Entity* entity : m_entities)
     {
         delete entity;
         entity = nullptr;
     }
 }
-
-void EntityManager::solveInsidersEntities() const
+void EntityManager::solveInsidersEntities(const float& p_deltaTime) const
 {
-    for(MoveableEntity* moveableEntity : m_moveableEntities)
+    for (MoveableEntity* moveableEntity : m_moveableEntities)
     {
         if (moveableEntity->getIsKinematic())
             continue;
-        
+
         Collider* moveableEntityCollider = moveableEntity->getCollider();
         const FRect& moveableEntityColliderRect = moveableEntityCollider->getColliderRect();
         const Vec2<float> moveableEntityPosition = moveableEntity->getPosition();
         std::mutex& moveableEntityMutex = moveableEntity->getMutex();
-        for(const Entity* entity : m_entities)
+
+        for (const Entity* entity : m_entities)
         {
-            if (moveableEntity == entity || entity == m_player)
+            if (moveableEntity == entity || entity == m_player || entity->getIsKinematic())
                 continue;
+
             Collider* entityCollider = entity->getCollider();
             const FRect& entityColliderRect = entityCollider->getColliderRect();
 
             std::lock_guard<std::mutex> insidersLock(moveableEntityMutex);
-            constexpr float epsilonValue = 1.f;
-            const float halfX = 3.f * moveableEntityColliderRect.w / 4.f;
-            const float halfY = 3.f * moveableEntityColliderRect.h / 4.f;
-            if (moveableEntityColliderRect.x + halfX + epsilonValue < entityColliderRect.x ||
-                moveableEntityColliderRect.x + moveableEntityColliderRect.w - (halfX + epsilonValue) > entityColliderRect.x + entityColliderRect.w ||
-                moveableEntityColliderRect.y + halfY + epsilonValue < entityColliderRect.y ||
-                moveableEntityColliderRect.y + moveableEntityColliderRect.h - (halfY + epsilonValue) > entityColliderRect.y + entityColliderRect.h)
-                    continue;
+
+            const float yOverlap = std::min(entityColliderRect.y + entityColliderRect.h - moveableEntityColliderRect.y,
+                                             moveableEntityColliderRect.y + moveableEntityColliderRect.h - entityColliderRect.y);
+
+            const float xOverlap = std::min(entityColliderRect.x + entityColliderRect.w - moveableEntityColliderRect.x,
+                                             moveableEntityColliderRect.x + moveableEntityColliderRect.w - entityColliderRect.x);
+
+            if (xOverlap + g_epsilonValue <= 0  || yOverlap + g_epsilonValue <= 0)
+                continue;
+            
             const Vec2<float> moveableEntityVelocity = moveableEntity->getVelocity();
-            if (moveableEntityVelocity.x <= -epsilonValue)
+
+            if (std::abs(xOverlap) < std::abs(yOverlap))
             {
-                moveableEntity->setPosition(entityColliderRect.x + entityColliderRect.w + epsilonValue,
-                    moveableEntityPosition.y);
-                moveableEntityCollider->updatePosition();
+                // Horizontal collision
+                if (moveableEntityVelocity.x < -g_epsilonValue &&
+                    xOverlap > -g_epsilonValue &&
+                    moveableEntityCollider->checkLeftCollisions(entity, p_deltaTime))
+                {
+                    moveableEntity->setPositionKeepingInitialPos(entityColliderRect.x + entityColliderRect.w + g_epsilonValue,
+                        moveableEntityPosition.y);
+                }
+                else if (moveableEntityVelocity.x > g_epsilonValue &&
+                    xOverlap > -g_epsilonValue &&
+                    moveableEntityCollider->checkRightCollisions(entity, p_deltaTime))
+                {
+                    moveableEntity->setPositionKeepingInitialPos(entityColliderRect.x - moveableEntityColliderRect.w - g_epsilonValue,
+                        moveableEntityPosition.y);
+                }
             }
-            else if (moveableEntityVelocity.x >= epsilonValue)
+            else
             {
-                moveableEntity->setPosition(entityColliderRect.x - moveableEntityColliderRect.w - epsilonValue,
-                    moveableEntityPosition.y);
-                moveableEntityCollider->updatePosition();
+                // Vertical collision
+                if (moveableEntityVelocity.y < -g_epsilonValue &&
+                    yOverlap > -g_epsilonValue &&
+                    moveableEntityCollider->checkUpperCollisions(entity, p_deltaTime))
+                {
+                    moveableEntity->setPositionKeepingInitialPos(moveableEntityPosition.x,
+                        entityColliderRect.y + entityColliderRect.h + g_epsilonValue);
+                }
+                else if (moveableEntityVelocity.y > g_epsilonValue &&
+                    yOverlap > -g_epsilonValue &&
+                    moveableEntityCollider->checkGroundCollision(entity, p_deltaTime))
+                {
+                    moveableEntity->setPositionKeepingInitialPos(moveableEntityPosition.x,
+                        entityColliderRect.y - moveableEntityColliderRect.h - g_epsilonValue);
+                }
             }
-            if (moveableEntityVelocity.y <= -epsilonValue)
-            {
-                moveableEntity->setPosition(moveableEntityPosition.x, entityColliderRect.y + entityColliderRect.h
-                    + epsilonValue);
-                moveableEntityCollider->updatePosition();
-            }
-            else if (moveableEntityVelocity.y >= epsilonValue)
-            {
-                moveableEntity->setPosition(moveableEntityPosition.x, entityColliderRect.y - moveableEntityColliderRect.h - epsilonValue);
-                moveableEntityCollider->updatePosition();
-            }
+            moveableEntityCollider->updatePosition();
         }
     }
 }

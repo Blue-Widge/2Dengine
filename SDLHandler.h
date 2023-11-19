@@ -13,10 +13,10 @@ public:
     bool loadFont();
     void loop() const;
     static SDLHandler* getHandlerInstance();
-    bool getIsPlaying() const { return m_isPlaying; }
+    bool getIsActivated() const { return m_isActivated; }
 private:
-    SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr),
-        m_isPlaying(true), m_inputManager(nullptr), m_gameloop(nullptr), m_inspector(nullptr), m_font(nullptr)
+    SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr), m_isActivated(true),
+        m_inputManager(nullptr), m_gameloop(nullptr), m_inspector(nullptr), m_gameStateButtons(nullptr), m_font(nullptr)
     {
     }
 
@@ -26,11 +26,12 @@ private:
     SDL_Renderer* m_renderer;
     SDL_Texture* m_background;
     
-    bool m_isPlaying;
+    bool m_isActivated;
 
     InputManager* m_inputManager;
     Gameloop* m_gameloop;
     Inspector* m_inspector;
+    GameStateButtons* m_gameStateButtons;
     const SDL_Rect m_sceneRect = {(SCREEN_WIDTH - SCENE_WIDTH) / 2, 0, SCENE_WIDTH, SCENE_HEIGHT};
     TTF_Font* m_font;
 };

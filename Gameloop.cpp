@@ -1,4 +1,7 @@
 ﻿#include "Gameloop.h"
+
+#include <algorithm>
+
 #include "EntityManager.h"
 #include "InputManager.h"
 
@@ -12,19 +15,14 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const
                                                 m_sceneRect(p_sceneRect), m_deltaTime(0.f),
                                                 m_loopBeginTime(0),
                                                 m_fixedUpdateTime(FIXED_UPDATE_TIME),
-                                                m_playingGame(true),
+                                                m_playingGame(false),
                                                 m_playingSDL(true),
                                                 m_inputManager(p_inputManager)
 {
     m_entityManager = new EntityManager(m_renderer);
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
     
-    auto test = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 10, 50, 50}, 10.f);
-    //auto test2 = m_entityManager->addMoveableEntity(BASE_TEXTURE, {10, 100, 50, 50}, 10.f);
-    m_entityManager->addEntity(BASE_TEXTURE, {400, 500, 50, 50});
-    m_entityManager->addEntity(BASE_TEXTURE, {10, 500, 100, 10});
-    auto player = m_entityManager->addPlayer(PLAYER_BASE_TEXTURE, {15, 100, 50, 100}, 80.f);
-    m_inputManager->setPlayerInstance(player);
+    chargeMyLevel();
 }
 
 Gameloop::~Gameloop()
@@ -41,19 +39,18 @@ void Gameloop::updateDeltaTime()
     m_loopBeginTime = loopEndTime;
 }
 
-void Gameloop::update() const
+void Gameloop::update()
 {
     if (!m_playingGame)
         return;
     const auto player = m_entityManager->getPlayer();
-    const auto moveableEntities = m_entityManager->getMoveableEntities();
-    player->applyGravity(m_deltaTime);
     player->applyMovements(m_deltaTime);
-    for (const auto moveableEntity : moveableEntities)
+    const auto collectibles = m_entityManager->getCollectibles();
+    for(auto* collectible : collectibles)
     {
-        moveableEntity->applyGravity(m_deltaTime);
+        collectible->detectCollected(player->getCollider()->getColliderRect());
     }
-    m_entityManager->solveInsidersEntities();
+    checkCollectibles();
 }
 
 void Gameloop::fixedUpdate() const
@@ -61,16 +58,18 @@ void Gameloop::fixedUpdate() const
     while (m_playingSDL)
     {
         if (!m_playingGame)
-            return;
+            continue;
         auto startTime = std::chrono::steady_clock::now();
         auto moveableEntities = m_entityManager->getMoveableEntities();
 
         //TODO: optimisation effectuate for loop on multiples threads
-        
+        const float fixedUpdateTime = m_fixedUpdateTime.count() / 1000.f;
         for (const auto entity : moveableEntities)
         {
-            entity->applyForces(m_fixedUpdateTime);
+            entity->applyForces(fixedUpdateTime);
+            entity->applyGravity(fixedUpdateTime);
         }
+        m_entityManager->solveInsidersEntities(fixedUpdateTime);
         auto endTime  = std::chrono::steady_clock::now();
         auto sleepTime = endTime - startTime;
         if (sleepTime > std::chrono::steady_clock::duration::zero())
@@ -104,6 +103,7 @@ void Gameloop::draw() const
 void Gameloop::playGame()
 {
     m_playingGame = true;
+    m_inputManager->setPlayerInstance(m_entityManager->getPlayer());
 }
 
 void Gameloop::pauseGame()
@@ -117,7 +117,7 @@ void Gameloop::stopGame()
     m_entityManager->resetEntities();
 }
 
-Entity* Gameloop::getEntityFromPos(int p_x, int p_y) const
+Entity* Gameloop::getEntityFromPos(int p_x, const int p_y) const
 {
     p_x -= (SCREEN_WIDTH - SCENE_WIDTH) / 2;
     const auto entities = m_entityManager->getEntities();
@@ -129,4 +129,43 @@ Entity* Gameloop::getEntityFromPos(int p_x, int p_y) const
                 return entity;
     }
     return nullptr;
+}
+
+void Gameloop::checkCollectibles()
+{
+    std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
+    if (!std::all_of(collectibles.cbegin(), collectibles.cend(),
+        [](const Collectible* p_collectible) { return p_collectible->getIsCollected();}))
+            return;
+    stopGame();
+}
+
+
+void Gameloop::chargeMyLevel() const
+{
+    m_entityManager->addPlayer(BASE_PLAYER_TEXTURE, {25, 30, 20, 40}, 80);
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 75, 100, 10});
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 150, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 130, 20, 20});
+    
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 225, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 205, 20, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {10, 300, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 280, 20, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {150, 0, 20, 300});
+    m_entityManager->addEntity(BASE_TEXTURE, {30, 400, 200, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {300, 400, 200, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {350, 380, 25, 20});
+    m_entityManager->addMoveableEntity(BASE_TEXTURE, {360, 370, 75, 10}, 10);
+    m_entityManager->addEntity(BASE_TEXTURE, {400, 380, 25, 20});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {380, 380, 20, 20});
+
+    m_entityManager->addEntity(BASE_TEXTURE, {550, 325, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {590, 305, 20, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {500, 250, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {540, 230, 20, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {400, 150, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {440, 130, 20, 20});
+    m_entityManager->addEntity(BASE_TEXTURE, {450, 75, 100, 10});
+    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {490, 55, 20, 20});
 }

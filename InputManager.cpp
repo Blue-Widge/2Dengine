@@ -63,13 +63,14 @@ void InputManager::checkInput()
             break;
             
             case SDL_MOUSEBUTTONDOWN:
-                if (m_gameloop->getPlayingGame())
-                    break;
                 if (m_event.button.button == SDL_BUTTON_LEFT)
                 {
-                    if (m_event.button.x > SCENE_WIDTH || m_event.button.y > SCENE_HEIGHT)
+                    const int mouseX = m_event.button.x;
+                    const int mouseY = m_event.button.y;
+                    m_gameStateButtons->detectPressedButtons(mouseX, mouseY);
+                    if (m_gameloop->getPlayingGame() || mouseX > SCENE_WIDTH || mouseY > SCENE_HEIGHT)
                         break;
-                    Entity* entity = m_gameloop->getEntityFromPos(m_event.button.x, m_event.button.y);
+                    Entity* entity = m_gameloop->getEntityFromPos(mouseX, mouseY);
                     m_inspector->selectEntity(entity);
                     //m_inspector->modifyInfoValue(m_event.button.x, m_event.button.y);
                 }
@@ -87,11 +88,11 @@ void InputManager::sendControls() const
 
     if (m_controls[UP])
         if (m_player->getOnGround())
-            m_player->setYVelocity(-1000.f);
+            m_player->setYVelocity(-250.f);
     if (m_controls[RIGHT])
-        m_player->setXVelocity(50.f);
+        m_player->setXVelocity(100.f);
     if (m_controls[LEFT])
-        m_player->setXVelocity(-50.f);
+        m_player->setXVelocity(-100.f);
     if ((m_controls[LEFT] ^ m_controls[RIGHT]) == false)
         m_player->setXVelocity(0.f);
 }

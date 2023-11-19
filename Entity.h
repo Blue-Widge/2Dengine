@@ -6,9 +6,6 @@
 #include "utils.h"
 #include "Collider.h"
 
-#define BASE_TEXTURE "./images/baseTexture.bmp"
-#define PLAYER_BASE_TEXTURE "./images/playerTexture.bmp"
-
 using std::to_string;
 class EntityManager;
 
@@ -20,7 +17,7 @@ public:
     
     void setPosition(float p_x, float p_y);
     inline Vec2<float> getPosition() const { return {m_rect.x, m_rect.y}; }
-    inline void setRotation(const float p_rotationAngle) { m_rotationAngle = p_rotationAngle; }
+    void setRotation(const float p_rotationAngle); 
     inline float getRotation() const { return m_rotationAngle; }
     void setSize(float p_w, float p_h);
     Vec2<float> getSize() const { return {m_rect.w, m_rect.h}; } 
@@ -30,9 +27,9 @@ public:
     inline SDL_Texture* getTexture() const { return m_texture; }
     inline void setTexture(const char* p_path);
     inline Uint16 getId() const { return m_id; }
-    inline Uint16 getDepth() const { return m_depth; }
-    inline void setDepth(const Uint16 p_depth) { m_depth = p_depth; }
     virtual std::string prepareEntityInfos() const;
+    inline bool getIsKinematic() const { return m_isKinematic; }
+    inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
 protected:
     Uint16 m_id = 0;
     
@@ -43,7 +40,8 @@ protected:
     
     float m_rotationAngle = 0.f;
     Collider* m_collider;
-    Uint16 m_depth = 0;
+    bool m_isKinematic = false;
+    Vec2<float> m_velocity;
 };
 
 class MoveableEntity : public Entity
@@ -54,23 +52,19 @@ public:
     MoveableEntity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                    const FRect& p_rect, float p_mass, float p_viscosity);
     void setPosition(float p_x, float p_y);
-    void setRotation(float p_rotationAngle);
-    void setSize(float p_w, float p_h);
+    void setPositionKeepingInitialPos(float p_x, float p_y);
     void move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime);
     void move(float p_deltaTime);
     void rotate(float p_rotationSpeed, float p_deltaTime);
-    void applyForces(const std::chrono::milliseconds p_fixedUpdateTime);
+    void applyForces(const float& p_deltaTime);
     inline float getMass() const { return m_mass; }
     inline bool getIsGravityReactive() const { return m_gravityReactive; }
     inline Vec2<float> getVelocity() const { return m_velocity; }
-    void resetEntity();
-    void applyGravity(float p_deltaTime);
+    virtual void resetEntity();
+    void applyGravity(const float& p_deltaTime);
     virtual std::string prepareEntityInfos() const override;
-    inline bool getIsKinematic() const { return m_isKinematic; }
-    inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline float getViscosity() const { return m_viscosity; }
     inline std::mutex& getMutex() { return m_entityMutex; }
-
 protected:
     static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     bool m_gravityReactive = true;
@@ -78,8 +72,6 @@ protected:
     constexpr static float gravity = 9.81f;
     float m_mass = 0.f;
     float m_viscosity = 1.f;
-    Vec2<float> m_velocity;
-    bool m_isKinematic = false;
     std::mutex m_entityMutex;
 };
 
@@ -96,7 +88,7 @@ public:
     void applyMovements(float p_deltaTime);
     std::string prepareEntityInfos() const override;
     inline void setXCounterSpeed(const float& p_counterSpeed) { m_xCounterSpeed = p_counterSpeed; }
-
+    void resetEntity() override;
 private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,
@@ -104,4 +96,22 @@ private:
     static Player* m_instance;
     bool m_onGround = false;
     float m_xCounterSpeed;
+};
+
+class Collectible : public Entity
+{
+public:
+    Collectible(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
+        const FRect& p_rect) : Entity(p_entityManager, p_id, p_renderer, p_path, p_rect)
+    {
+        m_isKinematic = true;
+        m_textureSave = m_texture;
+    }
+    std::string prepareEntityInfos() const override { return Entity::prepareEntityInfos(); }
+    void detectCollected(const FRect& p_playerRect);
+    inline bool getIsCollected() const { return m_isCollected; }
+    void resetEntity();
+private:
+    bool m_isCollected = false;
+    SDL_Texture* m_textureSave;
 };

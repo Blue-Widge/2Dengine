@@ -8,7 +8,7 @@
 #include "Entity.h"
 
 Inspector::Inspector(SDL_Renderer* p_renderer, TTF_Font* p_font) :
-m_renderer(p_renderer), m_rect({0}), m_titleRect({0}), m_font(p_font), m_selectionRect({0})
+m_renderer(p_renderer), m_font(p_font), m_selectionRect({0})
 {
     m_rect = {HIERARCHY_WIDTH + SCENE_WIDTH, 0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT};
     SDL_Surface* surface = SDL_CreateRGBSurface(0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT, 32, 0, 0, 0, 0);
@@ -28,7 +28,6 @@ m_renderer(p_renderer), m_rect({0}), m_titleRect({0}), m_font(p_font), m_selecti
     SDL_FreeSurface(surface);
     SDL_FreeSurface(textSurface);
     SDL_FreeSurface(selectionSurface);
-
 }
 
 void Inspector::displayInspector()

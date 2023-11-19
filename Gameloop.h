@@ -18,15 +18,17 @@ public:
     Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const SDL_Rect& p_sceneRect, SDL_Texture* p_background);
     ~Gameloop();
     void updateDeltaTime();
-    void update() const;
+    void update();
     void fixedUpdate() const;
     SDL_Rect convertEntityRectToScene(const FRect& p_rect) const;
     void draw() const;
     void playGame();
     void pauseGame();
     void stopGame();
-    inline bool getPlayingGame() const { return m_playingGame; }
+    inline bool& getPlayingGame() { return m_playingGame; }
     Entity* getEntityFromPos(const int p_x, const int p_y) const;
+
+    void checkCollectibles();
 private:
     SDL_Renderer* m_renderer;
     SDL_Texture* m_background;
@@ -41,4 +43,7 @@ private:
     bool m_playingSDL;
     EntityManager* m_entityManager;
     InputManager* m_inputManager;
+
+    
+    void chargeMyLevel() const;
 };

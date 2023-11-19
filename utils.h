@@ -12,8 +12,16 @@ enum
     INSPECTOR_HEIGHT = SCREEN_HEIGHT,
     HIERARCHY_WIDTH = INSPECTOR_WIDTH,
     HIERARCHY_HEIGHT = SCREEN_HEIGHT,
-    FIXED_UPDATE_TIME = 10 // ms
+    GAMESTATEBUTTONS_WIDTH = SCENE_WIDTH / 10,
+    GAMESTATEBUTTONS_HEIGHT = SCENE_HEIGHT / 20,
+    FIXED_UPDATE_TIME = 10, // ms
 };
+
+constexpr float g_epsilonValue = 0.8f;
+/* TODO : change from small scene width to full when playing
+int g_sceneWidth = SCENE_WIDTH;
+int g_sceneHeight = SCENE_HEIGHT;   
+*/
 
 enum Axis_e
 {
@@ -98,4 +106,11 @@ enum Controls
 };
 
 constexpr Uint8 controlsNb = 5;
+#pragma endregion
+
+#pragma region baseTextures
+#define BASE_BACKGROUND_IMAGE "./images/background.png"
+#define BASE_TEXTURE "./images/baseTexture.png"
+#define BASE_PLAYER_TEXTURE "./images/playerTexture.png"
+#define BASE_COLLECTIBLE_TEXTURE "./images/coin.png"
 #pragma endregion 

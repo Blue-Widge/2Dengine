@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "GameStateButtons.h"
+
 class Entity;
 
 class Inspector

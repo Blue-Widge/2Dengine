@@ -17,11 +17,13 @@ SDLHandler::~SDLHandler()
     SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
     SDL_DestroyTexture(m_background);
+    IMG_Quit();
     TTF_CloseFont(m_font);
     TTF_Quit();
-    m_window = nullptr;
-    m_renderer = nullptr;
-    m_background = nullptr;
+    delete m_inspector;
+    delete m_gameloop;
+    delete m_gameStateButtons;
+    delete m_inputManager;
 }
 
 bool SDLHandler::initSDL()
@@ -43,6 +45,12 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't load font" << std::endl;
         return false;
     }
+
+    if (!(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) & (IMG_INIT_PNG | IMG_INIT_JPG)))
+    {
+        std::cerr << "Couldn't init SDL_image" << std::endl;
+        return false;
+    }
     
     m_window = SDL_CreateWindow("2D Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
         SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -59,24 +67,25 @@ bool SDLHandler::initSDL()
         return false;
     }
 
-    SDL_Surface* backgroundBMP = SDL_LoadBMP("./images/background.bmp");
-    if (!backgroundBMP)
+    SDL_Surface* backgroundImage = IMG_Load(BASE_BACKGROUND_IMAGE);
+    if (!backgroundImage)
     {
         std::cerr << "Couldn't load background image" << std::endl;
         return false;
     }
 
-    m_background = SDL_CreateTextureFromSurface(m_renderer, backgroundBMP);
+    m_background = SDL_CreateTextureFromSurface(m_renderer, backgroundImage);
     if (!m_background)
     {
         std::cerr << "Couldn't create background texture" << std::endl;
     }
-    const int inspectorXpos = m_sceneRect.x + m_sceneRect.w;
-    m_inspector = new Inspector(m_renderer, m_font);
     
-    m_inputManager = new InputManager(&m_isPlaying, m_inspector);
+    m_inspector = new Inspector(m_renderer, m_font);
+    m_inputManager = new InputManager(&m_isActivated, m_inspector);
     m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);
+    m_gameStateButtons = new GameStateButtons(m_renderer, m_gameloop);
     m_inputManager->setGameloopObject(m_gameloop);
+    m_inputManager->setGameStateButtonsObject(m_gameStateButtons);
     return true;
 }
 
@@ -88,14 +97,20 @@ bool SDLHandler::loadFont()
 
 void SDLHandler::loop() const
 {
-    while (m_isPlaying)
+    while (m_isActivated)
     {
         m_inputManager->checkInput();
         m_inputManager->sendControls();
         m_gameloop->updateDeltaTime();
         m_gameloop->update();
         m_gameloop->draw();
-        m_inspector->displayInspector();
+        if (!m_gameloop->getPlayingGame())
+        {
+            m_inspector->displayInspector();
+            //TODO: display hierarchy
+            //TODO: display block placements
+        }
+            m_gameStateButtons->displayGameStateButtons();
         SDL_RenderPresent(m_renderer);
         SDL_Delay(0);
     }
