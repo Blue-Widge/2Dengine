@@ -21,10 +21,10 @@ EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityMa
     
     constexpr unsigned short int spaceBetween = 20;
     addChoice(BASE_TEXTURE, "Entity", spaceBetween);
-    addChoice(BASE_TEXTURE, "Moveable entity", spaceBetween);
+    addChoice(BASE_MOVEABLE_TEXTURE, "Moveable entity", spaceBetween);
     addChoice(BASE_COLLECTIBLE_TEXTURE, "Collectible", spaceBetween);    
     addChoice(BASE_PLAYER_TEXTURE, "Player", spaceBetween);    
-
+    
     //AFTER ADDING CHOICES
     unsigned short int count = 0;
     for(Choice& choice : m_choices)
@@ -33,6 +33,8 @@ EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityMa
         choice.m_shownTextureRect.x += (spaceBetween + m_choiceRect.w) * count;
         count++;
     }
+
+    //TODO: add delete Entity button
 }
 
 
@@ -75,7 +77,7 @@ bool EntityChooser::detectChosenEntity(const int p_x, const int p_y) const
             if (choice.m_name == "Entity")
                     m_entityManager->addEntity(BASE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
             else if (choice.m_name == "Moveable entity")
-                    m_entityManager->addMoveableEntity(BASE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f}, 10.f);
+                    m_entityManager->addMoveableEntity(BASE_MOVEABLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f}, 10.f);
             else if (choice.m_name == "Collectible")
                     m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
             else if (choice.m_name == "Player")
@@ -86,5 +88,3 @@ bool EntityChooser::detectChosenEntity(const int p_x, const int p_y) const
     }
     return false;
 }
-
-//TODO : implement moving block once placing it 

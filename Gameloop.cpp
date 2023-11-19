@@ -142,7 +142,7 @@ void Gameloop::checkCollectibles()
 
 void Gameloop::chargeMyLevel() const
 {
-    m_entityManager->addPlayer(BASE_PLAYER_TEXTURE, {25, 30, 20, 40}, 80);
+    m_entityManager->addPlayer(BASE_PLAYER_TEXTURE, {50, 30, 20, 40}, 80);
     m_entityManager->addEntity(BASE_TEXTURE, {10, 75, 100, 10});
     m_entityManager->addEntity(BASE_TEXTURE, {10, 150, 100, 10});
     m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 130, 20, 20});
@@ -155,7 +155,7 @@ void Gameloop::chargeMyLevel() const
     m_entityManager->addEntity(BASE_TEXTURE, {30, 400, 200, 20});
     m_entityManager->addEntity(BASE_TEXTURE, {300, 400, 200, 20});
     m_entityManager->addEntity(BASE_TEXTURE, {350, 380, 25, 20});
-    m_entityManager->addMoveableEntity(BASE_TEXTURE, {360, 370, 75, 10}, 10);
+    m_entityManager->addMoveableEntity(BASE_MOVEABLE_TEXTURE, {360, 365, 75, 15}, 10);
     m_entityManager->addEntity(BASE_TEXTURE, {400, 380, 25, 20});
     m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {380, 380, 20, 20});
 

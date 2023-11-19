@@ -32,7 +32,7 @@ private:
     SDL_Rect m_rect;
 
     std::vector<Choice> m_choices;
-    SDL_Color m_fontColor = {255, 255, 255, 255};
+    SDL_Color m_fontColor = {100,  100, 100, 255};
     SDL_Rect m_choiceRect;
     Hierarchy* m_hierarchy;
 };

@@ -5,8 +5,8 @@
 #include "EntityManager.h"
 
 Entity::Entity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
-               const FRect& p_rect) : m_id(p_id), m_renderer(p_renderer), m_rect(p_rect),
-                                      m_entityManager(p_entityManager)
+               const FRect& p_rect) : m_id(p_id), m_name("Entity " + to_string(m_id)), m_renderer(p_renderer),
+                                      m_rect(p_rect), m_entityManager(p_entityManager)
 {
     setTexture(p_path);
 }
@@ -57,12 +57,15 @@ std::string Entity::prepareEntityInfos() const
 
     //no need to recreate these variables at runtime but I don't see them as object's attribute
     std::string entityInfosString = "Entity's ID : " + to_string(m_id) + "\n"
-        "Entity's position : " + "x : " + to_string(entityRect.x) + " y : " + to_string(entityRect.y) + "\n"
+        "Entity's X position : " + to_string(entityRect.x) + "\n"
+        "Entity's Y position : " + to_string(entityRect.y) + "\n"
         "Entity's rotation : " + to_string(m_rotationAngle) + "\n"
-        "Entity's size : " + "x : " + to_string(entityRect.w) + " y : " + to_string(entityRect.h) + "\n"
-        "Collider's position : " + "x : " + to_string(colliderRect.x) + " y : " + to_string(colliderRect.y) +
-        "\n"
-        "Collider's size : " + "w : " + to_string(colliderRect.w) + " h : " + to_string(colliderRect.h) + "\n"
+        "Entity's X size : " + to_string(entityRect.w) + "\n"
+        "Entity's Y size : " + to_string(entityRect.h) + "\n"
+        "Collider's X position : " + to_string(colliderRect.x) + "\n"
+        "Collider's Y position : " + to_string(colliderRect.y) + "\n"
+        "Collider's X size : " + to_string(colliderRect.w) + "\n"
+        "Collider's Y size : " + to_string(colliderRect.h) + "\n"
         "Is kinematic : " + to_string(m_isKinematic) + "\n"
         "Entity's texture : \n";
     return entityInfosString;
@@ -81,6 +84,7 @@ MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id
                                                           m_initialPos({0, 0}), m_mass(p_mass),
                                                           m_viscosity(p_viscosity)
 {
+    m_name = "MoveableEntity " + to_string(m_id);
     m_velocity = {0.f, 0.f};
     m_initialPos.x = m_rect.x = p_rect.x;
     m_initialPos.y = m_rect.y = p_rect.y;
@@ -237,7 +241,7 @@ std::string MoveableEntity::prepareEntityInfos() const
 {
     std::string moveableEntityInfosString = Entity::prepareEntityInfos() +
         "Entity's velocity : x : " + to_string(m_velocity.x) + " y : " + to_string(m_velocity.y) + "\n"
-        "Entity's mass : " + to_string(m_mass) + "kg\n"
+        "Entity's mass : " + to_string(m_mass) + " kg\n"
         "Entity's viscosity : " + to_string(m_viscosity) + "\n"
         "Gravity reactive : " + to_string(m_gravityReactive) + "\n"
         "Is kinematic : " + to_string(m_isKinematic) + "\n";
@@ -281,6 +285,7 @@ Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_rend
                const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) : MoveableEntity(
                                                                                                            p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity), m_xCounterSpeed(0.f)
 {
+    m_name = "Player";
 }
 
 std::string Collectible::prepareEntityInfos() const

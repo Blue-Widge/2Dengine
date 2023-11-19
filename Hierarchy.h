@@ -4,14 +4,6 @@
 
 #include "EntityManager.h"
 
-struct EntityInfo
-{
-    EntityInfo(SDL_Texture* p_textTexture, SDL_Rect p_textRect, const Entity* p_entityPtr) :
-        m_textTexture(p_textTexture), m_textRect(p_textRect), m_entityPtr(p_entityPtr) {}
-    SDL_Texture* m_textTexture;
-    SDL_Rect m_textRect;
-    const Entity* m_entityPtr;
-};
 
 class Hierarchy
 {
@@ -21,6 +13,15 @@ public:
     void updateHierarchy();
     void displayHierarchy() const;
 private:
+    struct EntityInfo
+    {
+        EntityInfo(SDL_Texture* p_textTexture, SDL_Rect p_textRect, const Entity* p_entityPtr) :
+            m_textTexture(p_textTexture), m_textRect(p_textRect), m_entityPtr(p_entityPtr) {}
+        SDL_Texture* m_textTexture;
+        SDL_Rect m_textRect;
+        const Entity* m_entityPtr;
+    };
+
     SDL_Renderer* m_renderer;
     TTF_Font* m_font;
     SDL_Color m_fontColor = {200, 200, 200, 255};

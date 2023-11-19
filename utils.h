@@ -111,6 +111,7 @@ constexpr Uint8 controlsNb = 5;
 #pragma region baseTextures
 #define BASE_BACKGROUND_IMAGE "./images/background.png"
 #define BASE_TEXTURE "./images/baseTexture.png"
+#define BASE_MOVEABLE_TEXTURE "./images/baseMoveableTexture.png"
 #define BASE_PLAYER_TEXTURE "./images/playerTexture.png"
 #define BASE_COLLECTIBLE_TEXTURE "./images/coin.png"
 #pragma endregion

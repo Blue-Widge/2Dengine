@@ -15,7 +15,7 @@ public:
     Entity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect);
     ~Entity();
     
-    void setPosition(float p_x, float p_y);
+    virtual void setPosition(float p_x, float p_y);
     inline Vec2<float> getPosition() const { return {m_rect.x, m_rect.y}; }
     void setRotation(const float p_rotationAngle); 
     inline float getRotation() const { return m_rotationAngle; }
@@ -29,9 +29,11 @@ public:
     inline Uint16 getId() const { return m_id; }
     virtual std::string prepareEntityInfos() const;
     inline bool getIsKinematic() const { return m_isKinematic; }
-    inline void setKinematic(bool p_kinematic) { m_isKinematic = p_kinematic; }
+    inline void setKinematic(const bool p_kinematic) { m_isKinematic = p_kinematic; }
+    inline std::string getName() const { return m_name; }
 protected:
     Uint16 m_id = 0;
+    std::string m_name;
     
     SDL_Renderer* m_renderer = nullptr;
     FRect m_rect;
@@ -51,19 +53,22 @@ public:
                    const FRect& p_rect, float p_mass);
     MoveableEntity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                    const FRect& p_rect, float p_mass, float p_viscosity);
-    void setPosition(float p_x, float p_y);
+    void setPosition(float p_x, float p_y) override;
     inline void setVelocity(const Vec2<float> p_velocity) { m_velocity = p_velocity; }
     void setPositionKeepingInitialPos(float p_x, float p_y);
     void move(Axis_e p_axis, float p_moveSpeed, float p_deltaTime);
     void move(float p_deltaTime);
     void rotate(float p_rotationSpeed, float p_deltaTime);
     void applyForces(const float& p_deltaTime);
+    inline void setMass(const float p_mass) { m_mass = p_mass;}
     inline float getMass() const { return m_mass; }
-    inline bool getIsGravityReactive() const { return m_gravityReactive; }
+    inline void setGravityReactive(const bool p_gravityReactive) { m_gravityReactive = p_gravityReactive; }
+    inline bool getGravityReactive() const { return m_gravityReactive; }
     inline Vec2<float> getVelocity() const { return m_velocity; }
     virtual void resetEntity();
     void applyGravity(const float& p_deltaTime);
     virtual std::string prepareEntityInfos() const override;
+    inline void setViscosity(const float p_viscosity) { m_viscosity = p_viscosity; }
     inline float getViscosity() const { return m_viscosity; }
     inline std::mutex& getMutex() { return m_entityMutex; }
 protected:
@@ -105,6 +110,7 @@ public:
     Collectible(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
         const FRect& p_rect) : Entity(p_entityManager, p_id, p_renderer, p_path, p_rect)
     {
+        m_name = "Collectible " + to_string(m_id);
         m_isKinematic = true;
         m_textureSave = m_texture;
     }

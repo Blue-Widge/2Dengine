@@ -67,14 +67,22 @@ void InputManager::checkInput()
                 {
                     const int mouseX = m_event.button.x;
                     const int mouseY = m_event.button.y;
-                    bool foundClickPos = m_gameStateButtons->detectPressedButtons(mouseX, mouseY);
+                    if (mouseX > SCENE_WIDTH + HIERARCHY_WIDTH)
+                    {
+                        m_inspector->modifyInfoValue(mouseX, mouseY);
+                        break;
+                    }
+                    if (mouseY > SCENE_HEIGHT)
+                    {
+                        if (m_gameStateButtons->detectPressedButtons(mouseX, mouseY))
+                            break;
+                        if (m_entityChooser->detectChosenEntity(mouseX, mouseY))
+                            break;
+                        //SOMETHING ELSE ?
+                        break;
+                    }
                     Entity* entity = m_gameloop->getEntityFromPos(mouseX, mouseY);
                     m_inspector->selectEntity(entity);
-                    if (foundClickPos)
-                        break;
-                    foundClickPos = m_entityChooser->detectChosenEntity(mouseX, mouseY);
-                    //might be useful later on
-                    //m_inspector->modifyInfoValue(m_event.button.x, m_event.button.y);
                 }
             break;
             default:
