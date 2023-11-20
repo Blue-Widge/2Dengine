@@ -3,14 +3,21 @@
 #include "Gameloop.h"
 
 
+//to handle fullscreen when playing
+extern int g_scenePosX;
+extern int g_scenePosY;
+extern int g_sceneWidth;
+extern int g_sceneHeight;
+
+
 GameStateButtons::GameStateButtons(SDL_Renderer* p_renderer, Gameloop* p_gameloop) : m_renderer(p_renderer),
                                                                                      m_gameLoop(p_gameloop)
 {
-    m_playRect = {HIERARCHY_WIDTH + SCENE_WIDTH - GAMESTATEBUTTONS_WIDTH, SCENE_HEIGHT,
+    m_playRect = {g_scenePosX + SCENE_WIDTH - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
         GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_pauseRect = {HIERARCHY_WIDTH + SCENE_WIDTH - 4 * GAMESTATEBUTTONS_WIDTH / 6, SCENE_HEIGHT,
+    m_pauseRect = {g_scenePosX + SCENE_WIDTH - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
         GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_stopRect = {HIERARCHY_WIDTH + SCENE_WIDTH - 2 * GAMESTATEBUTTONS_WIDTH / 6, SCENE_HEIGHT,
+    m_stopRect = {g_scenePosX + SCENE_WIDTH - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
         GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
 
     
@@ -61,4 +68,13 @@ bool GameStateButtons::detectPressedButtons(const int p_x, const int p_y) const
         return true;
     }
     return false;
+}
+void GameStateButtons::updateButtonsRect()
+{
+    m_playRect = {g_scenePosX + g_sceneWidth - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+    GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
+    m_pauseRect = {g_scenePosX + g_sceneWidth - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
+    m_stopRect = {g_scenePosX + g_sceneWidth - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
 }

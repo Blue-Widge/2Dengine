@@ -20,7 +20,7 @@ public:
 private:
     SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr), m_isActivated(true),
         m_inputManager(nullptr), m_gameloop(nullptr), m_inspector(nullptr), m_hierarchy(nullptr),
-        m_gameStateButtons(nullptr), m_font(nullptr)
+        m_gameStateButtons(nullptr), m_font(nullptr), m_entityChooser(nullptr)
     {
     }
 
@@ -37,7 +37,7 @@ private:
     Inspector* m_inspector;
     Hierarchy* m_hierarchy;
     GameStateButtons* m_gameStateButtons;
-    const SDL_Rect m_sceneRect = {(SCREEN_WIDTH - SCENE_WIDTH) / 2, 0, SCENE_WIDTH, SCENE_HEIGHT};
+    SDL_Rect m_sceneRect = {HIERARCHY_WIDTH, 0, SCENE_WIDTH, SCENE_HEIGHT};
     TTF_Font* m_font;
     EntityChooser* m_entityChooser;
 };

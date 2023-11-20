@@ -3,6 +3,7 @@
 #include <SDL_ttf.h>
 
 #include "EntityManager.h"
+#include "Inspector.h"
 
 
 class Hierarchy
@@ -12,6 +13,8 @@ public:
     ~Hierarchy();
     void updateHierarchy();
     void displayHierarchy() const;
+    inline void setInspector(Inspector* p_inspector) { m_inspector = p_inspector; }
+    bool detectClickedName(int p_x, int p_y) const;
 private:
     struct EntityInfo
     {
@@ -34,6 +37,6 @@ private:
     Vec2<int> m_infosPos;
     
     EntityManager* m_entityManager;
-    std::string m_hierarchyInfos;
     std::vector<EntityInfo> m_entityInfos;
+    Inspector* m_inspector;
 };

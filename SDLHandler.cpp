@@ -22,9 +22,15 @@ SDLHandler::~SDLHandler()
     TTF_Quit();
     Mix_Quit();
     delete m_inspector;
+    m_inspector = nullptr;
     delete m_gameloop;
+    m_gameloop = nullptr;
     delete m_gameStateButtons;
+    m_gameStateButtons = nullptr;
     delete m_inputManager;
+    m_inputManager = nullptr;
+    instance = nullptr;
+    
 }
 
 bool SDLHandler::initSDL()
@@ -96,18 +102,26 @@ bool SDLHandler::initSDL()
     m_inspector = new Inspector(m_renderer, m_font);
     m_inputManager = new InputManager(&m_isActivated, m_inspector);
     m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);
+    EntityManager* entityManager = m_gameloop->getEntityManager();
     m_inputManager->setGameloopObject(m_gameloop);
     m_gameStateButtons = new GameStateButtons(m_renderer, m_gameloop);
     m_inputManager->setGameStateButtonsObject(m_gameStateButtons);
-    m_hierarchy = new Hierarchy(m_renderer, m_font, m_gameloop->getEntityManager());
-    m_entityChooser = new EntityChooser(m_renderer, m_gameloop->getEntityManager(), m_hierarchy);
+    m_entityChooser = new EntityChooser(m_renderer, entityManager);
+    m_hierarchy = new Hierarchy(m_renderer, m_font, entityManager);
     m_inputManager->setEntityChooser(m_entityChooser);
+    m_inputManager->setHierarchy(m_hierarchy);
+    m_inputManager->setEntityManager(entityManager);
+    m_gameloop->setCheckStateButtons(m_gameStateButtons);
+    m_entityChooser->setHierarchy(m_hierarchy);
+    m_inspector->setHierarchy(m_hierarchy);
+    m_hierarchy->setInspector(m_inspector);
+    m_entityChooser->setInspector(m_inspector);
     return true;
 }
 
 bool SDLHandler::loadFont()
 {
-    m_font = TTF_OpenFont(BASE_FONT, 20);
+    m_font = TTF_OpenFont(BASE_FONT, static_cast<int>(0.0278f * SCREEN_HEIGHT));
     return (m_font == nullptr);
 }
 

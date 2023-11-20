@@ -5,9 +5,9 @@
 
 #include "Hierarchy.h"
 
-EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityManager, Hierarchy* p_hierarchy) :
-    m_renderer(p_renderer), m_entityManager(p_entityManager), m_font(TTF_OpenFont(BASE_FONT, 12)),
-    m_hierarchy(p_hierarchy)
+EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityManager) :
+    m_renderer(p_renderer), m_entityManager(p_entityManager),
+    m_font(TTF_OpenFont(BASE_FONT, static_cast<int>(0.0167f * SCREEN_HEIGHT))), m_inspector(nullptr)
 {
     m_rect = {HIERARCHY_WIDTH, SCENE_HEIGHT, SCENE_WIDTH, SCREEN_HEIGHT - SCENE_HEIGHT};
     SDL_Surface* surface = SDL_CreateRGBSurface(0, m_rect.w, m_rect.h, 32, 0, 0, 0, 0);
@@ -16,7 +16,8 @@ EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityMa
     m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);
 
     SDL_FreeSurface(surface);
-    m_choiceRect = {HIERARCHY_WIDTH + 10, (SCREEN_HEIGHT - SCENE_HEIGHT) / 2 + SCENE_HEIGHT, 80, 80};
+    m_choiceRect = {HIERARCHY_WIDTH + 10, (SCREEN_HEIGHT - SCENE_HEIGHT) / 2 + SCENE_HEIGHT,
+        static_cast<int>(0.111f * SCREEN_HEIGHT), static_cast<int>(SCREEN_HEIGHT * 0.111f) };
     m_choiceRect.y -= m_choiceRect.h / 2;
     
     constexpr unsigned short int spaceBetween = 20;
@@ -33,8 +34,6 @@ EntityChooser::EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityMa
         choice.m_shownTextureRect.x += (spaceBetween + m_choiceRect.w) * count;
         count++;
     }
-
-    //TODO: add delete Entity button
 }
 
 
@@ -74,15 +73,18 @@ bool EntityChooser::detectChosenEntity(const int p_x, const int p_y) const
     {
         if (detectButtonClicked(p_x, p_y, choice.m_shownTextureRect) || detectButtonClicked(p_x, p_y, choice.m_nameRect))
         {
+            Entity* addedEntity = nullptr;
             if (choice.m_name == "Entity")
-                    m_entityManager->addEntity(BASE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
+                    addedEntity = m_entityManager->addEntity(BASE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
             else if (choice.m_name == "Moveable entity")
-                    m_entityManager->addMoveableEntity(BASE_MOVEABLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f}, 10.f);
+                    addedEntity = m_entityManager->addMoveableEntity(BASE_MOVEABLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f}, 10.f);
             else if (choice.m_name == "Collectible")
-                    m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
+                    addedEntity = m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 50.f, 50.f});
             else if (choice.m_name == "Player")
-                m_entityManager->addPlayer(BASE_PLAYER_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 30, 70}, 80);
+                addedEntity = m_entityManager->addPlayer(BASE_PLAYER_TEXTURE, {SCENE_WIDTH / 2, SCENE_HEIGHT / 2, 30, 70}, 80);
             m_hierarchy->updateHierarchy();
+            if (addedEntity)
+                m_inspector->selectEntity(addedEntity);
             return true;
         }
     }

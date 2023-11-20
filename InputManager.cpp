@@ -2,6 +2,11 @@
 #include "Gameloop.h"
 #include "Inspector.h"
 
+extern int g_scenePosX;
+extern int g_scenePosY;
+extern int g_sceneWidth;
+extern int g_sceneHeight;
+
 void InputManager::checkInput()
 {
     while (SDL_PollEvent(&m_event))
@@ -32,8 +37,14 @@ void InputManager::checkInput()
                 case SDLK_e:
                 case SDLK_RETURN:
                     m_controls[USE] = true;
+                    break;
+                case SDLK_DELETE:
+                case SDLK_BACKSPACE:
+                case SDLK_KP_BACKSPACE:
+                    m_controls[DELETE] = true;
                 break;
-                default: ;
+                default:
+                    break;
             }
             break;
         case SDL_KEYUP:
@@ -55,6 +66,11 @@ void InputManager::checkInput()
                 case SDLK_RETURN:
                     m_controls[USE] = false;
                 break;
+                case SDLK_DELETE:
+                case SDLK_BACKSPACE:
+                case SDLK_KP_BACKSPACE:
+                    m_controls[DELETE] = false;
+                        break;
                 default: ;
             }
             case SDL_MOUSEBUTTONUP:
@@ -67,15 +83,21 @@ void InputManager::checkInput()
                 {
                     const int mouseX = m_event.button.x;
                     const int mouseY = m_event.button.y;
-                    if (mouseX > SCENE_WIDTH + HIERARCHY_WIDTH)
+                    if (!m_gameloop->getPlayingGame() && mouseX > g_scenePosX + g_sceneWidth)
                     {
                         m_inspector->modifyInfoValue(mouseX, mouseY);
                         break;
                     }
-                    if (mouseY > SCENE_HEIGHT)
-                    {
-                        if (m_gameStateButtons->detectPressedButtons(mouseX, mouseY))
+
+                    if (!m_gameloop->getPlayingGame() && mouseX < g_scenePosX)
+                        if (m_hierarchy->detectClickedName(mouseX, mouseY))
                             break;
+                    
+                    if (m_gameStateButtons->detectPressedButtons(mouseX, mouseY))
+                        break;
+                    
+                    if (mouseY > g_sceneHeight)
+                    {
                         if (m_entityChooser->detectChosenEntity(mouseX, mouseY))
                             break;
                         //SOMETHING ELSE ?
@@ -91,8 +113,19 @@ void InputManager::checkInput()
     }
 }
 
-void InputManager::sendControls() const
+void InputManager::sendControls()
 {
+    if (!m_gameloop->getPlayingGame() && m_controls[DELETE])
+    {
+        const Entity* toDeleteEntity = m_inspector->getSelectedEntity();
+        if (toDeleteEntity == nullptr)
+            return;
+        m_inspector->setEntityPtr(nullptr);
+        m_entityManager->deleteEntityUpdate(toDeleteEntity);
+        m_hierarchy->updateHierarchy();
+        m_controls[DELETE] = false;
+    }
+    
     if (!m_player)
         return;
 

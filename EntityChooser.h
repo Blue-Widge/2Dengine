@@ -19,11 +19,14 @@ struct Choice
 class EntityChooser
 {
 public:
-    EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityManager, Hierarchy* p_hierarchy);
+    EntityChooser(SDL_Renderer* p_renderer, EntityManager* p_entityManager);
     ~EntityChooser();
     void displayEntityChooser() const;
     void addChoice(const char* p_path, const std::string& p_entityName, unsigned short int p_spaceBetween);
     bool detectChosenEntity(int p_x, int p_y) const;
+    inline void setHierarchy(Hierarchy* p_hierarchy) { m_hierarchy = p_hierarchy; }
+    inline void setInspector(Inspector* p_inspector) { m_inspector = p_inspector; }
+    
 private:
     SDL_Renderer* m_renderer;
     EntityManager* m_entityManager;
@@ -35,4 +38,5 @@ private:
     SDL_Color m_fontColor = {100,  100, 100, 255};
     SDL_Rect m_choiceRect;
     Hierarchy* m_hierarchy;
+    Inspector* m_inspector;
 };

@@ -33,6 +33,8 @@ public:
     inline bool getIsKinematic() const { return m_isKinematic; }
     inline void setKinematic(const bool p_kinematic) { m_isKinematic = p_kinematic; }
     inline std::string getName() const { return m_name; }
+    inline void setName(const std::string& p_name) { m_name = p_name; }
+    virtual void updateBeforeDelete() const;
 protected:
     Uint16 m_id = 0;
     std::string m_name;
@@ -55,6 +57,7 @@ public:
                    const FRect& p_rect, float p_mass);
     MoveableEntity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                    const FRect& p_rect, float p_mass, float p_viscosity);
+    ~MoveableEntity() override;
     void setPosition(float p_x, float p_y) override;
     inline void setVelocity(const Vec2<float> p_velocity) { m_velocity = p_velocity; }
     void setPositionKeepingInitialPos(float p_x, float p_y);
@@ -73,6 +76,7 @@ public:
     inline void setViscosity(const float p_viscosity) { m_viscosity = p_viscosity; }
     inline float getViscosity() const { return m_viscosity; }
     inline std::mutex& getMutex() { return m_entityMutex; }
+    void updateBeforeDelete() const override;
 protected:
     static void applyForceTo(MoveableEntity* p_entity, Vec2<float> p_velocity);
     bool m_gravityReactive = true;
@@ -103,6 +107,7 @@ private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,
                               float p_viscosity);
+private:
     static Player* m_instance;
     bool m_onGround = false;
     float m_xCounterSpeed;
@@ -112,7 +117,7 @@ private:
 class Collectible : public Entity
 {
 public:
-    Collectible(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
+    Collectible(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
         const FRect& p_rect) : Entity(p_entityManager, p_id, p_renderer, p_path, p_rect)
     {
         m_name = "Collectible " + to_string(m_id);
@@ -125,6 +130,7 @@ public:
     void detectCollected(const FRect& p_playerRect);
     inline bool getIsCollected() const { return m_isCollected; }
     void resetEntity();
+    void updateBeforeDelete() const override;
 private:
     bool m_isCollected = false;
     SDL_Texture* m_textureSave;

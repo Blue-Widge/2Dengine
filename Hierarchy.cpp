@@ -30,17 +30,15 @@ Hierarchy::~Hierarchy()
 
 void Hierarchy::updateHierarchy()
 {
-    m_hierarchyInfos.clear();
     for(const Hierarchy::EntityInfo& entityInfo : m_entityInfos)
         SDL_DestroyTexture(entityInfo.m_textTexture);
     m_entityInfos.clear();
     
     const std::vector<Entity*> entities = m_entityManager->getEntities();
     unsigned short int count = 0;
-    TTF_SetFontSize(m_font, 12);
+    TTF_SetFontSize(m_font, static_cast<int>(0.0167f * SCREEN_HEIGHT));
     for (const Entity* entity : entities)
     {
-        m_hierarchyInfos.append(entity->getName());
         SDL_Surface* currEntityInfoSurface = TTF_RenderText_Solid_Wrapped(m_font, entity->getName().c_str(), m_fontColor,
             HIERARCHY_WIDTH);
         SDL_Rect currEntityRect = {m_infosPos.x, m_infosPos.y + count * currEntityInfoSurface->h, currEntityInfoSurface->w, currEntityInfoSurface->h};
@@ -48,7 +46,7 @@ void Hierarchy::updateHierarchy()
         SDL_FreeSurface(currEntityInfoSurface);
         ++count;
     }
-    TTF_SetFontSize(m_font, 20);
+    TTF_SetFontSize(m_font, static_cast<int>(0.0278f * SCREEN_HEIGHT));
 }
 
 void Hierarchy::displayHierarchy() const
@@ -61,5 +59,16 @@ void Hierarchy::displayHierarchy() const
         SDL_RenderCopy(m_renderer, entityInfo.m_textTexture, nullptr, &currRect);
     }
 }
+bool Hierarchy::detectClickedName(const int p_x, const int p_y) const
+{
+    for(const EntityInfo& entityInfo : m_entityInfos)
+    {
+        if (!detectButtonClicked(p_x, p_y, entityInfo.m_textRect))
+            continue;
+        m_inspector->selectEntity(const_cast<Entity*>(entityInfo.m_entityPtr));
+        return true;
+    }
+    return false;
+}
 
-//TODO : add clickable names
+    

@@ -6,8 +6,8 @@ enum
 {
     SCREEN_WIDTH = 1280,
     SCREEN_HEIGHT = 720,
-    SCENE_WIDTH = 800,
-    SCENE_HEIGHT = 550,
+    SCENE_WIDTH = 900, // SCREEN_WIDTH * 0.625
+    SCENE_HEIGHT = 576, // SCENE_HEIGHT * 0.8
     INSPECTOR_WIDTH = (SCREEN_WIDTH - SCENE_WIDTH) / 2,
     INSPECTOR_HEIGHT = SCREEN_HEIGHT,
     HIERARCHY_WIDTH = INSPECTOR_WIDTH,
@@ -18,10 +18,6 @@ enum
 };
 
 constexpr float g_epsilonValue = 0.75f;
-/* TODO : change from small scene width to full when playing
-int g_sceneWidth = SCENE_WIDTH;
-int g_sceneHeight = SCENE_HEIGHT;   
-*/
 
 enum Axis_e
 {
@@ -102,10 +98,14 @@ enum Controls
     RIGHT,
     DOWN,
     LEFT,
-    USE
+    USE,
+    DELETE,
+
+
+    //LEAVE THIS AT THE END FOR AUTOMATIC INCREMENT
+    CONTROLS_NUMBER
 };
 
-constexpr Uint8 controlsNb = 5;
 #pragma endregion
 
 #pragma region baseTextures

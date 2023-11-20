@@ -5,12 +5,19 @@
 #include "EntityManager.h"
 #include "InputManager.h"
 
-Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const SDL_Rect& p_sceneRect) : Gameloop(p_inputManager, p_renderer,
-    p_sceneRect, nullptr)
+//to handle fullscreen when playing
+extern int g_scenePosX;
+extern int g_scenePo;
+extern int g_sceneWidth;
+extern int g_sceneHeight;
+
+
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_Rect& p_sceneRect) :
+Gameloop(p_inputManager, p_renderer, p_sceneRect, nullptr)
 {
 }
 
-Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const SDL_Rect& p_sceneRect,
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_Rect& p_sceneRect,
                    SDL_Texture* p_background) : m_renderer(p_renderer), m_background(p_background),
                                                 m_sceneRect(p_sceneRect), m_deltaTime(0.f),
                                                 m_loopBeginTime(0),
@@ -64,7 +71,7 @@ void Gameloop::fixedUpdate() const
         auto startTime = std::chrono::steady_clock::now();
         auto moveableEntities = m_entityManager->getMoveableEntities();
 
-        //TODO: optimisation effectuate for loop on multiples threads
+        //TODO : Optimisation on multiple threads to waste less time
         const float fixedUpdateTime = m_fixedUpdateTime.count() / 1000.f;
         for (const auto entity : moveableEntities)
         {
@@ -105,17 +112,30 @@ void Gameloop::draw() const
 void Gameloop::playGame()
 {
     m_playingGame = true;
+    
+    m_sceneRect.x = g_scenePosX = 0;
+    m_sceneRect.w = g_sceneWidth = SCREEN_WIDTH;
+    m_sceneRect.h = g_sceneHeight = SCREEN_HEIGHT;
     m_inputManager->setPlayerInstance(m_entityManager->getPlayer());
+    m_gameStateButtons->updateButtonsRect();
 }
 
 void Gameloop::pauseGame()
 {
     m_playingGame = false;
+    m_sceneRect.x = g_scenePosX = HIERARCHY_WIDTH;
+    m_sceneRect.w = g_sceneWidth = SCENE_WIDTH;
+    m_sceneRect.h = g_sceneHeight = SCENE_HEIGHT;
+    m_gameStateButtons->updateButtonsRect();
 }
 
 void Gameloop::stopGame()
 {
     m_playingGame = false;
+    m_sceneRect.x = g_scenePosX = HIERARCHY_WIDTH;
+    m_sceneRect.w = g_sceneWidth = SCENE_WIDTH;
+    m_sceneRect.h = g_sceneHeight = SCENE_HEIGHT;
+    m_gameStateButtons->updateButtonsRect();
     m_entityManager->resetEntities();
 }
 

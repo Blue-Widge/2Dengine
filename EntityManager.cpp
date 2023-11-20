@@ -1,14 +1,10 @@
 ﻿#include "EntityManager.h"
 
+#include "Inspector.h"
+
 EntityManager::~EntityManager()
 {
-    for (auto entity : m_entities)
-    {
-        delete entity;
-        entity = nullptr;
-    }
-    m_entities.clear();
-    m_moveableEntities.clear();
+    deleteEntities();
 }
 
 Entity* EntityManager::addEntity(const char* p_texturePath, const FRect& p_rect)
@@ -19,6 +15,13 @@ Entity* EntityManager::addEntity(const char* p_texturePath, const FRect& p_rect)
     m_staticEntities.push_back(entity);
 
     return entity;
+}
+
+void EntityManager::deleteEntityUpdate(const Entity* p_entity)
+{
+    p_entity->updateBeforeDelete();
+    delete p_entity;
+    p_entity = nullptr;
 }
 
 MoveableEntity* EntityManager::addMoveableEntity(const char* p_texturePath, const FRect& p_rect, const float p_mass)
@@ -63,13 +66,17 @@ void EntityManager::resetEntities() const
         collectible->resetEntity();
 }
 
-void EntityManager::deleteEntities() const
+void EntityManager::deleteEntities()
 {
     for (const Entity* entity : m_entities)
     {
         delete entity;
         entity = nullptr;
     }
+    m_entities.clear();
+    m_moveableEntities.clear();
+    m_player = nullptr;
+    m_collectibles.clear();
 }
 void EntityManager::solveInsidersEntities(const float& p_deltaTime) const
 {

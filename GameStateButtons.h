@@ -12,6 +12,7 @@ public:
     ~GameStateButtons();
     void displayGameStateButtons() const;
     bool detectPressedButtons(int p_x, int p_y) const;
+    void updateButtonsRect();
 private:
     SDL_Renderer* m_renderer;
     Gameloop* m_gameLoop;

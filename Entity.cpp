@@ -1,26 +1,34 @@
 ﻿#include "Entity.h"
-
 #include <SDL_image.h>
-
 #include "EntityManager.h"
+
+
+//to handle fullscreen when playing
+int g_scenePosX = HIERARCHY_WIDTH;
+int g_scenePosY = 0;
+int g_sceneWidth = SCENE_WIDTH;
+int g_sceneHeight = SCENE_HEIGHT;
 
 Entity::Entity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path,
                const FRect& p_rect) : m_id(p_id), m_name("Entity " + to_string(m_id)), m_renderer(p_renderer),
                                       m_rect(p_rect), m_entityManager(p_entityManager)
 {
     setTexture(p_path);
+    m_collider = new BoxCollider(this, m_rect);
 }
 
 Entity::~Entity()
 {
     SDL_DestroyTexture(m_texture);
+    m_texture = nullptr;
     delete m_collider;
+    m_collider = nullptr;
 }
 
 void Entity::setPosition(const float p_x, const float p_y)
 {
-    m_rect.x = (p_x + m_rect.w) > SCENE_WIDTH ? (SCENE_WIDTH - m_rect.w) : p_x;
-    m_rect.y = (p_y + m_rect.h) > SCENE_HEIGHT ? (SCENE_HEIGHT - m_rect.h) : p_y;
+    m_rect.x = (p_x + m_rect.w) > g_sceneWidth ? (g_sceneWidth - m_rect.w) : p_x;
+    m_rect.y = (p_y + m_rect.h) > g_sceneHeight ? (g_sceneHeight - m_rect.h) : p_y;
     m_collider->updatePosition();
 }
 
@@ -47,7 +55,6 @@ void Entity::setTexture(const char* p_path)
 {
     const auto surface = IMG_Load(p_path);
     m_texture = SDL_CreateTextureFromSurface(m_renderer, surface);
-    m_collider = reinterpret_cast<Collider*>(new BoxCollider(this, m_rect));
 }
 
 std::string Entity::prepareEntityInfos() const
@@ -56,7 +63,8 @@ std::string Entity::prepareEntityInfos() const
     const SDL_Rect colliderRect = convertFRect(getCollider()->getColliderRect());
 
     //no need to recreate these variables at runtime but I don't see them as object's attribute
-    std::string entityInfosString = "Entity's ID : " + to_string(m_id) + "\n"
+    std::string entityInfosString = "Entity's name : " + m_name + "\n"
+        "Entity's ID : " + to_string(m_id) + "\n"
         "Entity's X position : " + to_string(entityRect.x) + "\n"
         "Entity's Y position : " + to_string(entityRect.y) + "\n"
         "Entity's rotation : " + to_string(m_rotationAngle) + "\n"
@@ -69,6 +77,27 @@ std::string Entity::prepareEntityInfos() const
         "Is kinematic : " + to_string(m_isKinematic) + "\n"
         "Entity's texture : \n";
     return entityInfosString;
+}
+void Entity::updateBeforeDelete() const
+{
+    const std::vector<Entity*> entities = m_entityManager->getEntities();
+    const std::vector<Entity*> staticEntities = m_entityManager->getStaticEntities();
+    std::vector<Entity*> remainingEntities = {};
+    std::vector<Entity*> remainingStaticEntities = {};
+    for(Entity* currEntity : entities)
+    {
+        if (currEntity == this)
+            continue;
+        remainingEntities.emplace_back(currEntity);
+    }
+    for(Entity* currStaticEntity : staticEntities)
+    {
+        if (currStaticEntity == this)
+            continue;
+        remainingStaticEntities.emplace_back(currStaticEntity);
+    }
+    m_entityManager->setEntities(std::move(remainingEntities));
+    m_entityManager->setStaticEntities(std::move(remainingStaticEntities));
 }
 
 MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id, SDL_Renderer* p_renderer,
@@ -90,6 +119,11 @@ MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id
     m_initialPos.y = m_rect.y = p_rect.y;
 }
 
+MoveableEntity::~MoveableEntity()
+{
+    Entity::~Entity();
+}
+
 void MoveableEntity::setPosition(const float p_x, const float p_y)
 {
     m_initialPos.x = p_x;
@@ -109,13 +143,13 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
 
     if (p_axis == x)
     {
-        if (colliderRect.x + colliderRect.w > SCENE_WIDTH)
-            deltaPos = SCENE_WIDTH - colliderRect.w;
+        if (colliderRect.x + colliderRect.w > g_sceneWidth)
+            deltaPos = g_sceneWidth - colliderRect.w;
         m_rect.x += deltaPos;
         return;
     }
-    if (colliderRect.y + colliderRect.h > SCENE_HEIGHT)
-        deltaPos = SCENE_HEIGHT - colliderRect.h;
+    if (colliderRect.y + colliderRect.h > g_sceneHeight)
+        deltaPos = g_sceneHeight - colliderRect.h;
     m_rect.y += deltaPos;
 
     m_collider->updatePosition();
@@ -175,6 +209,19 @@ void MoveableEntity::applyForces(const float& p_deltaTime)
     }
 }
 
+void MoveableEntity::updateBeforeDelete() const
+{
+    Entity::updateBeforeDelete();
+    const std::vector<MoveableEntity*> moveableEntities = m_entityManager->getMoveableEntities();
+    std::vector<MoveableEntity*> remainingMoveableEntities = {};
+    for(MoveableEntity* currMoveableEntity : moveableEntities)
+    {
+        if (currMoveableEntity == this)
+            continue;
+        remainingMoveableEntities.emplace_back(currMoveableEntity);
+    }
+    m_entityManager->setMoveableEntities(std::move(remainingMoveableEntities));
+}
 void MoveableEntity::applyForceTo(MoveableEntity* p_entity, const Vec2<float> p_velocity)
 {
     p_entity->m_velocity.x += p_velocity.x;
@@ -265,7 +312,9 @@ Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p
 
 Player::~Player()
 {
-    Entity::~Entity();
+    MoveableEntity::~MoveableEntity();
+    m_entityManager->setPlayer(nullptr);
+    m_instance = nullptr;
     Mix_FreeChunk(m_jumpSoundEffect);
 }
 
@@ -336,4 +385,18 @@ void Collectible::resetEntity()
 {
     m_texture = m_textureSave;
     m_isCollected = false;
+}
+void Collectible::updateBeforeDelete() const
+{
+    Entity::updateBeforeDelete();
+    
+    const std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
+    std::vector<Collectible*> remainingCollectibles = {};
+    for (Collectible* currCollectible : collectibles)
+    {
+        if (currCollectible == this)
+            continue;
+        remainingCollectibles.emplace_back(currCollectible);
+    }
+    m_entityManager->setCollectibles(std::move(remainingCollectibles));
 }

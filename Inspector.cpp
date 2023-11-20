@@ -5,9 +5,10 @@
 #include <sstream>
 
 #include "Entity.h"
+#include "Hierarchy.h"
 
 Inspector::Inspector(SDL_Renderer* p_renderer, TTF_Font* p_font) :
-m_renderer(p_renderer), m_font(p_font), m_selectionRect({0})
+m_renderer(p_renderer), m_font(p_font), m_selectionRect({0, 0, 0, 0}), m_hierarchy(nullptr)
 {
     m_rect = {HIERARCHY_WIDTH + SCENE_WIDTH, 0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT};
     SDL_Surface* surface = SDL_CreateRGBSurface(0, m_rect.w, m_rect.h, 32, 0, 0, 0, 0);
@@ -36,7 +37,7 @@ void Inspector::displayInspector()
     if (m_entityPtr == nullptr)
         return;
     std::string infos;
-    if (m_entityChanged || m_entityPtr != m_lastEntityPtr)
+    if (m_entityChanged || m_lastEntityPtr == nullptr || m_entityPtr != m_lastEntityPtr)
     {
         infos = m_entityPtr->prepareEntityInfos();
         m_lastEntityPtr = m_entityPtr == nullptr ? m_lastEntityPtr : m_entityPtr;
@@ -84,7 +85,7 @@ void Inspector::displayEntityInfos(const std::string& p_string, const int p_enti
         lines.push_back(line);
         ++nbLines;
     }
-    TTF_SetFontSize(m_font, 12);
+    TTF_SetFontSize(m_font, static_cast<int>(0.0167f * static_cast<float>(SCREEN_HEIGHT)));
     for(int nbLine = 0; nbLine < nbLines; ++nbLine)
     {
         std::string currLine = lines.at(nbLine);
@@ -97,7 +98,7 @@ void Inspector::displayEntityInfos(const std::string& p_string, const int p_enti
         m_entityInfos.emplace_back(infosTexture, infosRect, currLine.substr(0, currLine.find(" :")));
         SDL_FreeSurface(infosSurface);
     }
-    TTF_SetFontSize(m_font, 20);
+    TTF_SetFontSize(m_font, static_cast<int>(0.0278f * SCREEN_HEIGHT));
     lastEntityId = p_entityId;
 }
 
@@ -155,7 +156,7 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
                 }
             }
         }
-        TTF_SetFontSize(m_font, 12);
+        TTF_SetFontSize(m_font, static_cast<int>(0.0167f * SCREEN_HEIGHT));
         SDL_RenderClear(inputRenderer);
         SDL_SetRenderDrawColor(inputRenderer, 255, 255, 255, 255);
         SDL_Surface* textSurface = TTF_RenderText_Solid(m_font, userInput.c_str(), {0, 0, 0, 255});
@@ -168,7 +169,7 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
         SDL_DestroyTexture(texture);
         SDL_RenderPresent(inputRenderer);
     }
-    TTF_SetFontSize(m_font, 20);
+    TTF_SetFontSize(m_font, static_cast<int>(0.0278f * SCREEN_HEIGHT));
     SDL_StopTextInput();
     SDL_HideWindow(inputWindow);
     SDL_DestroyRenderer(inputRenderer);
@@ -180,7 +181,19 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
 
 void Inspector::assignModifiedValue(const std::string& p_infoName, const std::string& p_value)
 {
-    if (p_infoName == "Entity's X position")
+    if (p_infoName == "Entity's name")
+    {
+        try
+        {
+            m_entityPtr->setName(p_value);
+            m_hierarchy->updateHierarchy();
+        }
+        catch (...)
+        {
+            std::cerr << "User didn't enter a floating value" << std::endl;
+        }
+    }
+    else if (p_infoName == "Entity's X position")
     {
         try
         {

@@ -7,6 +7,8 @@
 
 #include "GameStateButtons.h"
 
+class Hierarchy;
+
 class Entity;
 
 class Inspector
@@ -20,6 +22,9 @@ public:
     void modifyInfoValue(int p_x, int p_y);
     void assignModifiedValue(const std::string& p_infoName, const std::string& p_value);
     inline void setCurrentText(const std::string& p_text) { m_currentText = p_text; }
+    inline const Entity* getSelectedEntity() const { return m_entityPtr; }
+    void setEntityPtr(Entity* p_entityPtr) { m_lastEntityPtr = m_entityPtr = p_entityPtr;}
+    inline void setHierarchy(Hierarchy* p_hierarchy) { m_hierarchy = p_hierarchy; }
 private:
     struct EntityInfo
     {
@@ -48,4 +53,5 @@ private:
     std::vector<Inspector::EntityInfo> m_entityInfos;
     Entity* m_lastEntityPtr = nullptr;
     bool m_entityChanged = true;
+    Hierarchy* m_hierarchy;
 };
