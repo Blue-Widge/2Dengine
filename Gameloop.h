@@ -22,7 +22,7 @@ public:
     ~Gameloop();
     void updateDeltaTime();
     void update();
-    void fixedUpdate() const;
+    void fixedUpdate();
     SDL_Rect convertEntityRectToScene(const FRect& p_rect) const;
     void draw() const;
     void playGame();
@@ -52,4 +52,7 @@ private:
 
     Mix_Chunk* m_winSoundEffect = nullptr;
     void chargeMyLevel() const;
+    
+    const unsigned int m_processor_count = std::thread::hardware_concurrency();
+    std::vector<std::thread> m_threads;
 };

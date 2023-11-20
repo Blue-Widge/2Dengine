@@ -31,6 +31,7 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_R
     
     chargeMyLevel();
     m_winSoundEffect = Mix_LoadWAV("./sounds/victory.mp3");
+    m_threads.reserve(m_processor_count - 1);
 }
 
 Gameloop::~Gameloop()
@@ -62,7 +63,7 @@ void Gameloop::update()
     checkCollectibles();
 }
 
-void Gameloop::fixedUpdate() const
+void Gameloop::fixedUpdate()
 {
     while (m_playingSDL)
     {
@@ -71,13 +72,26 @@ void Gameloop::fixedUpdate() const
         auto startTime = std::chrono::steady_clock::now();
         auto moveableEntities = m_entityManager->getMoveableEntities();
 
-        //TODO : Optimisation on multiple threads to waste less time
+        //Optimisation on multiple threads to waste less time
         const float fixedUpdateTime = m_fixedUpdateTime.count() / 1000.f;
-        for (const auto entity : moveableEntities)
+        const size_t max = std::min(moveableEntities.size(), m_processor_count - 1);
+        auto applyForceAndGravitySubset = [&moveableEntities, &fixedUpdateTime](int p_start, int p_end)
         {
-            entity->applyForces(fixedUpdateTime);
-            entity->applyGravity(fixedUpdateTime);
+            for(int i = p_start; i < p_end; ++i)
+            {
+                moveableEntities[i]->applyForces(fixedUpdateTime);
+                moveableEntities[i]->applyGravity(fixedUpdateTime);
+            }
+        };
+
+        const size_t entitiesPerThread = moveableEntities.size() / max;
+        for(size_t i = 0; i < max; ++i)
+        {
+            m_threads.emplace_back(applyForceAndGravitySubset, i * entitiesPerThread, (i + 1) * entitiesPerThread);
         }
+        for(auto& thread : m_threads)
+            thread.join();
+        m_threads.clear();
         m_entityManager->solveInsidersEntities(fixedUpdateTime);
         auto endTime  = std::chrono::steady_clock::now();
         auto sleepTime = endTime - startTime;
