@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <vector>
 #include <chrono>
+#include <SDL_mixer.h>
 #include <thread>
 
 class InputManager;
@@ -44,6 +45,6 @@ private:
     EntityManager* m_entityManager;
     InputManager* m_inputManager;
 
-    
+    Mix_Chunk* m_winSoundEffect = nullptr;
     void chargeMyLevel() const;
 };

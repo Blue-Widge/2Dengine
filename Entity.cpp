@@ -263,6 +263,12 @@ Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p
     return m_instance;
 }
 
+Player::~Player()
+{
+    Entity::~Entity();
+    Mix_FreeChunk(m_jumpSoundEffect);
+}
+
 void Player::applyMovements(const float p_deltaTime)
 {
     move(Axis_e::x, m_velocity.x - m_xCounterSpeed, p_deltaTime);
@@ -286,6 +292,13 @@ Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_rend
                                                                                                            p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity), m_xCounterSpeed(0.f)
 {
     m_name = "Player";
+    m_jumpSoundEffect = Mix_LoadWAV("./sounds/jump.mp3");
+}
+
+Collectible::~Collectible()
+{
+    Entity::~Entity();
+    Mix_FreeChunk(m_coinSoundEffect);
 }
 
 std::string Collectible::prepareEntityInfos() const
@@ -313,7 +326,10 @@ void Collectible::detectCollected(const FRect& p_playerRect)
         m_rect.y + m_rect.h >= p_playerRect.y &&
         m_rect.y <= p_playerRect.y + p_playerRect.h);
     if (m_isCollected)
+    {
+        Mix_PlayChannel(2, m_coinSoundEffect, 0);
         m_texture = SDL_CreateTexture(m_renderer, SDL_TEXTUREACCESS_STATIC, 0, 0, 0);
+    }
 }
 
 void Collectible::resetEntity()

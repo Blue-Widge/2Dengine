@@ -47,5 +47,5 @@ private:
     
     std::vector<Inspector::EntityInfo> m_entityInfos;
     Entity* m_lastEntityPtr = nullptr;
-    bool m_entityChanged;
+    bool m_entityChanged = true;
 };

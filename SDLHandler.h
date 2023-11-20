@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "EntityChooser.h"
-#include "SDL.h"
+#include <SDL.h>
+#include <SDL_mixer.h>
 #include "utils.h"
 #include "Inspector.h"
 #include "InputManager.h"

@@ -3,6 +3,8 @@
 #include <string>
 #include <chrono>
 #include <mutex>
+#include <SDL_mixer.h>
+
 #include "utils.h"
 #include "Collider.h"
 
@@ -13,7 +15,7 @@ class Entity
 {
 public:
     Entity(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect);
-    ~Entity();
+    virtual ~Entity();
     
     virtual void setPosition(float p_x, float p_y);
     inline Vec2<float> getPosition() const { return {m_rect.x, m_rect.y}; }
@@ -87,6 +89,7 @@ public:
     static Player* getPlayerInstance(EntityManager* p_entityManager, Uint16 p_id,
                                      SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,
                                      float p_viscosity);
+    ~Player() override;
     inline void setOnGround(const bool p_onGround) { m_onGround = p_onGround; }
     inline bool getOnGround() const { return m_onGround; }
     inline void setXVelocity(const float p_x) {m_velocity.x = p_x;}
@@ -95,6 +98,7 @@ public:
     std::string prepareEntityInfos() const override;
     inline void setXCounterSpeed(const float& p_counterSpeed) { m_xCounterSpeed = p_counterSpeed; }
     void resetEntity() override;
+    inline void playJumpSound() const { Mix_PlayChannel(2, m_jumpSoundEffect, 0); }
 private:
     Player(EntityManager* p_entityManager, Uint16 p_id,
                               SDL_Renderer* p_renderer, const char* p_path, const FRect& p_rect, float p_mass,
@@ -102,6 +106,7 @@ private:
     static Player* m_instance;
     bool m_onGround = false;
     float m_xCounterSpeed;
+    Mix_Chunk* m_jumpSoundEffect;
 };
 
 class Collectible : public Entity
@@ -113,7 +118,9 @@ public:
         m_name = "Collectible " + to_string(m_id);
         m_isKinematic = true;
         m_textureSave = m_texture;
+        m_coinSoundEffect = Mix_LoadWAV("./sounds/coin.mp3");
     }
+    ~Collectible() override;
     std::string prepareEntityInfos() const override;
     void detectCollected(const FRect& p_playerRect);
     inline bool getIsCollected() const { return m_isCollected; }
@@ -121,4 +128,5 @@ public:
 private:
     bool m_isCollected = false;
     SDL_Texture* m_textureSave;
+    Mix_Chunk* m_coinSoundEffect;
 };

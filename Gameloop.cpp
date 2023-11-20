@@ -23,6 +23,7 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, const
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
     
     chargeMyLevel();
+    m_winSoundEffect = Mix_LoadWAV("./sounds/victory.mp3");
 }
 
 Gameloop::~Gameloop()
@@ -30,6 +31,7 @@ Gameloop::~Gameloop()
     m_playingSDL = m_playingGame = false;
     m_fixedUpdateThread.join();
     delete m_entityManager;
+    Mix_FreeChunk(m_winSoundEffect);
 }
 
 void Gameloop::updateDeltaTime()
@@ -137,6 +139,8 @@ void Gameloop::checkCollectibles()
         [](const Collectible* p_collectible) { return p_collectible->getIsCollected();}))
             return;
     stopGame();
+    //WIN
+    Mix_PlayChannel(2, m_winSoundEffect, 0);
 }
 
 

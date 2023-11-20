@@ -1,6 +1,5 @@
 ﻿#include "SDLHandler.h"
 #include <iostream>
-
 #include "Entity.h"
 #include "EntityChooser.h"
 
@@ -21,6 +20,7 @@ SDLHandler::~SDLHandler()
     IMG_Quit();
     TTF_CloseFont(m_font);
     TTF_Quit();
+    Mix_Quit();
     delete m_inspector;
     delete m_gameloop;
     delete m_gameStateButtons;
@@ -52,7 +52,19 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't init SDL_image" << std::endl;
         return false;
     }
+
+    if (!(Mix_Init(MIX_INIT_MP3) & MIX_INIT_MP3))
+    {
+        std::cerr << "Couldn't init SDL_mixer" << std::endl;
+        return false;
+    }
     
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
+    {
+        std::cerr << "Couldn't setup audio options for SDL_mixer" << std::endl;
+        return false;
+    }
+
     m_window = SDL_CreateWindow("2D Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
         SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!m_window)

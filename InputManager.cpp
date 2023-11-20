@@ -98,7 +98,10 @@ void InputManager::sendControls() const
 
     if (m_controls[UP])
         if (m_player->getOnGround())
+        {
+            m_player->playJumpSound();
             m_player->setYVelocity(-250.f);
+        }
     if (m_controls[RIGHT])
         m_player->setXVelocity(100.f);
     if (m_controls[LEFT])

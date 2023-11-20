@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <SDL_mixer.h>
 #include <vector>
 #include "Entity.h"
 
