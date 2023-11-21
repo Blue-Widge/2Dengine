@@ -28,18 +28,17 @@ public:
     void playGame();
     void pauseGame();
     void stopGame();
-    inline bool& getPlayingGame() { return m_playingGame; }
-    Entity* getEntityFromPos(const int p_x, const int p_y) const;
-    inline  EntityManager* getEntityManager() const { return m_entityManager; }
+    bool& getPlayingGame() { return m_playingGame; }
+    Entity* getEntityFromPos(int p_x, int p_y) const;
+    EntityManager* getEntityManager() const { return m_entityManager; }
     void checkCollectibles();
-    inline void setCheckStateButtons(GameStateButtons* p_gameStateButtons) { m_gameStateButtons = p_gameStateButtons; }
-
+    void setCheckStateButtons(GameStateButtons* p_gameStateButtons) { m_gameStateButtons = p_gameStateButtons; }
 private:
     SDL_Renderer* m_renderer;
     SDL_Texture* m_background;
 
     SDL_Rect& m_sceneRect;
-    
+
     float m_deltaTime;
     Uint32 m_loopBeginTime;
     std::chrono::milliseconds m_fixedUpdateTime;
@@ -52,7 +51,7 @@ private:
 
     Mix_Chunk* m_winSoundEffect = nullptr;
     void chargeMyLevel() const;
-    
+
     const unsigned int m_processor_count = std::thread::hardware_concurrency();
     std::vector<std::thread> m_threads;
 };

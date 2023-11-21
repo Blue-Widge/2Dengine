@@ -11,16 +11,22 @@ extern int g_sceneHeight;
 
 
 GameStateButtons::GameStateButtons(SDL_Renderer* p_renderer, Gameloop* p_gameloop) : m_renderer(p_renderer),
-                                                                                     m_gameLoop(p_gameloop)
+    m_gameLoop(p_gameloop)
 {
-    m_playRect = {g_scenePosX + SCENE_WIDTH - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_pauseRect = {g_scenePosX + SCENE_WIDTH - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_stopRect = {g_scenePosX + SCENE_WIDTH - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
+    m_playRect = {
+        g_scenePosX + SCENE_WIDTH - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
+    m_pauseRect = {
+        g_scenePosX + SCENE_WIDTH - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
+    m_stopRect = {
+        g_scenePosX + SCENE_WIDTH - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
 
-    
+
     SDL_Surface* playSurface = IMG_Load("./images/playButton.png");
     SDL_Surface* pauseSurface = IMG_Load("./images/pauseButton.png");
     SDL_Surface* stopSurface = IMG_Load("./images/stopButton.png");
@@ -28,7 +34,7 @@ GameStateButtons::GameStateButtons(SDL_Renderer* p_renderer, Gameloop* p_gameloo
     m_playTexture = SDL_CreateTextureFromSurface(m_renderer, playSurface);
     m_pauseTexture = SDL_CreateTextureFromSurface(m_renderer, pauseSurface);
     m_stopTexture = SDL_CreateTextureFromSurface(m_renderer, stopSurface);
-    
+
     SDL_FreeSurface(playSurface);
     SDL_FreeSurface(pauseSurface);
     SDL_FreeSurface(stopSurface);
@@ -71,10 +77,16 @@ bool GameStateButtons::detectPressedButtons(const int p_x, const int p_y) const
 }
 void GameStateButtons::updateButtonsRect()
 {
-    m_playRect = {g_scenePosX + g_sceneWidth - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-    GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_pauseRect = {g_scenePosX + g_sceneWidth - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
-    m_stopRect = {g_scenePosX + g_sceneWidth - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
-        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT};
+    m_playRect = {
+        g_scenePosX + g_sceneWidth - GAMESTATEBUTTONS_WIDTH, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
+    m_pauseRect = {
+        g_scenePosX + g_sceneWidth - 4 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
+    m_stopRect = {
+        g_scenePosX + g_sceneWidth - 2 * GAMESTATEBUTTONS_WIDTH / 6, g_sceneHeight - GAMESTATEBUTTONS_HEIGHT,
+        GAMESTATEBUTTONS_WIDTH / 3, GAMESTATEBUTTONS_HEIGHT
+    };
 }

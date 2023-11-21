@@ -19,8 +19,8 @@ public:
     bool getIsActivated() const { return m_isActivated; }
 private:
     SDLHandler() : m_window(nullptr), m_renderer(nullptr), m_background(nullptr), m_isActivated(true),
-        m_inputManager(nullptr), m_gameloop(nullptr), m_inspector(nullptr), m_hierarchy(nullptr),
-        m_gameStateButtons(nullptr), m_font(nullptr), m_entityChooser(nullptr)
+                   m_inputManager(nullptr), m_gameloop(nullptr), m_inspector(nullptr), m_hierarchy(nullptr),
+                   m_gameStateButtons(nullptr), m_font(nullptr), m_entityChooser(nullptr)
     {
     }
 
@@ -29,7 +29,7 @@ private:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     SDL_Texture* m_background;
-    
+
     bool m_isActivated;
 
     InputManager* m_inputManager;

@@ -30,7 +30,6 @@ SDLHandler::~SDLHandler()
     delete m_inputManager;
     m_inputManager = nullptr;
     instance = nullptr;
-    
 }
 
 bool SDLHandler::initSDL()
@@ -64,7 +63,7 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't init SDL_mixer" << std::endl;
         return false;
     }
-    
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
     {
         std::cerr << "Couldn't setup audio options for SDL_mixer" << std::endl;
@@ -78,7 +77,7 @@ bool SDLHandler::initSDL()
         std::cerr << "Couldn't load window" << std::endl;
         return false;
     }
-    
+
     m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_SOFTWARE);
     if (!m_renderer)
     {
@@ -94,11 +93,8 @@ bool SDLHandler::initSDL()
     }
 
     m_background = SDL_CreateTextureFromSurface(m_renderer, backgroundImage);
-    if (!m_background)
-    {
-        std::cerr << "Couldn't create background texture" << std::endl;
-    }
-    
+    if (!m_background) { std::cerr << "Couldn't create background texture" << std::endl; }
+
     m_inspector = new Inspector(m_renderer, m_font);
     m_inputManager = new InputManager(&m_isActivated, m_inspector);
     m_gameloop = new Gameloop(m_inputManager, m_renderer, m_sceneRect, m_background);
@@ -140,7 +136,7 @@ void SDLHandler::loop() const
             m_hierarchy->displayHierarchy();
             m_entityChooser->displayEntityChooser();
         }
-            m_gameStateButtons->displayGameStateButtons();
+        m_gameStateButtons->displayGameStateButtons();
         SDL_RenderPresent(m_renderer);
         SDL_Delay(0);
     }

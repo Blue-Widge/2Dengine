@@ -6,15 +6,18 @@ enum
 {
     SCREEN_WIDTH = 1280,
     SCREEN_HEIGHT = 720,
-    SCENE_WIDTH = 900, // SCREEN_WIDTH * 0.625
-    SCENE_HEIGHT = 576, // SCENE_HEIGHT * 0.8
+    SCENE_WIDTH = 900,
+    // SCREEN_WIDTH * 0.625
+    SCENE_HEIGHT = 576,
+    // SCENE_HEIGHT * 0.8
     INSPECTOR_WIDTH = (SCREEN_WIDTH - SCENE_WIDTH) / 2,
     INSPECTOR_HEIGHT = SCREEN_HEIGHT,
     HIERARCHY_WIDTH = INSPECTOR_WIDTH,
     HIERARCHY_HEIGHT = SCREEN_HEIGHT,
     GAMESTATEBUTTONS_WIDTH = SCENE_WIDTH / 10,
     GAMESTATEBUTTONS_HEIGHT = SCENE_HEIGHT / 20,
-    FIXED_UPDATE_TIME = 10, // ms
+    FIXED_UPDATE_TIME = 10,
+    // ms
 };
 
 constexpr float g_epsilonValue = 0.75f;
@@ -34,7 +37,9 @@ struct FRect
 
 inline SDL_Rect convertFRect(const FRect& p_rect)
 {
-    const SDL_Rect rect = {static_cast<int>(p_rect.x), static_cast<int>(p_rect.y), static_cast<int>(p_rect.w), static_cast<int>(p_rect.h)};
+    const SDL_Rect rect = {
+        static_cast<int>(p_rect.x), static_cast<int>(p_rect.y), static_cast<int>(p_rect.w), static_cast<int>(p_rect.h)
+    };
     return rect;
 }
 #pragma endregion
@@ -79,15 +84,9 @@ Vec2<T> operator*(float p_floatingPoint, const Vec2<T>& p_vec)
 }
 
 template <typename T>
-Vec2<T> operator*(const Vec2<T>& p_vec, float p_floatingPoint)
-{
-    return p_floatingPoint * p_vec;
-}
+Vec2<T> operator*(const Vec2<T>& p_vec, float p_floatingPoint) { return p_floatingPoint * p_vec; }
 template <typename T>
-Vec2<T> operator/(const Vec2<T>& p_vec, float p_floatingPoint)
-{
-    return p_vec * (1.f / p_floatingPoint);
-}
+Vec2<T> operator/(const Vec2<T>& p_vec, float p_floatingPoint) { return p_vec * (1.f / p_floatingPoint); }
 #pragma endregion
 
 #pragma region controls

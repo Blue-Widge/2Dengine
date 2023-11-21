@@ -7,8 +7,8 @@
 #include "Entity.h"
 #include "Hierarchy.h"
 
-Inspector::Inspector(SDL_Renderer* p_renderer, TTF_Font* p_font) :
-m_renderer(p_renderer), m_font(p_font), m_selectionRect({0, 0, 0, 0}), m_hierarchy(nullptr)
+Inspector::Inspector(SDL_Renderer* p_renderer, TTF_Font* p_font) : m_renderer(p_renderer), m_font(p_font),
+                                                                   m_selectionRect({0, 0, 0, 0}), m_hierarchy(nullptr)
 {
     m_rect = {HIERARCHY_WIDTH + SCENE_WIDTH, 0, INSPECTOR_WIDTH, INSPECTOR_HEIGHT};
     SDL_Surface* surface = SDL_CreateRGBSurface(0, m_rect.w, m_rect.h, 32, 0, 0, 0, 0);
@@ -18,7 +18,9 @@ m_renderer(p_renderer), m_font(p_font), m_selectionRect({0, 0, 0, 0}), m_hierarc
 
     SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(m_font, "Inspector", m_fontColor, INSPECTOR_WIDTH);
     m_titleTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
-    m_titleRect = {m_rect.x + (SCREEN_WIDTH - m_rect.x) / 2 - textSurface->w / 2, m_rect.y, textSurface->w, textSurface->h};
+    m_titleRect = {
+        m_rect.x + (SCREEN_WIDTH - m_rect.x) / 2 - textSurface->w / 2, m_rect.y, textSurface->w, textSurface->h
+    };
 
     SDL_Surface* selectionSurface = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
     SDL_FillRect(selectionSurface, nullptr, SDL_MapRGBA(surface->format, 0, 255, 0, 10));
@@ -70,30 +72,28 @@ void Inspector::displayEntityInfos(const std::string& p_string, const int p_enti
         return;
     }
 
-    for (const auto& entityInfo : m_entityInfos)
-    {
-        SDL_DestroyTexture(entityInfo.m_textTexture);
-    }
+    for (const auto& entityInfo : m_entityInfos) { SDL_DestroyTexture(entityInfo.m_textTexture); }
     m_entityInfos.clear();
-    
+
     std::vector<std::string> lines;
     std::istringstream iss(p_string);
     std::string line;
     int nbLines = 0;
-    while(std::getline(iss, line))
+    while (std::getline(iss, line))
     {
         lines.push_back(line);
         ++nbLines;
     }
     TTF_SetFontSize(m_font, static_cast<int>(0.0167f * static_cast<float>(SCREEN_HEIGHT)));
-    for(int nbLine = 0; nbLine < nbLines; ++nbLine)
+    for (int nbLine = 0; nbLine < nbLines; ++nbLine)
     {
         std::string currLine = lines.at(nbLine);
         SDL_Surface* infosSurface = TTF_RenderText_Solid_Wrapped(m_font, currLine.c_str(), m_fontColor, INSPECTOR_WIDTH);
         SDL_Texture* infosTexture = SDL_CreateTextureFromSurface(m_renderer, infosSurface);
         const SDL_Rect infosRect = {
             m_rect.x, m_rect.y + m_titleRect.h + nbLine * infosSurface->h,
-            infosSurface->w, infosSurface->h };
+            infosSurface->w, infosSurface->h
+        };
         SDL_RenderCopy(m_renderer, infosTexture, nullptr, &infosRect);
         m_entityInfos.emplace_back(infosTexture, infosRect, currLine.substr(0, currLine.find(" :")));
         SDL_FreeSurface(infosSurface);
@@ -106,8 +106,8 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
 {
     bool clickedOnInfo = false;
     std::string infoName;
-    SDL_Rect infoRect = {p_x,p_y, 100, 20};
-    for(const Inspector::EntityInfo& entityInfo : m_entityInfos)
+    SDL_Rect infoRect = {p_x, p_y, 100, 20};
+    for (const EntityInfo& entityInfo : m_entityInfos)
     {
         if (detectButtonClicked(p_x, p_y, entityInfo.m_textRect))
         {
@@ -121,7 +121,7 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
         infoName.find("velocity") != std::string::npos || infoName.find("ground") != std::string::npos ||
         infoName.find("Collectible") != std::string::npos)
         return;
-    
+
     SDL_Window* inputWindow = SDL_CreateWindow("Input", p_x, p_y + infoRect.h, 100, infoRect.h,
         SDL_WINDOW_POPUP_MENU | SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP);
     SDL_Renderer* inputRenderer = SDL_CreateRenderer(inputWindow, -1, SDL_RENDERER_SOFTWARE);
@@ -130,10 +130,10 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
 
     std::string userInput = "";
     bool done = false;
-    while(!done)
+    while (!done)
     {
         SDL_Event e;
-        while(SDL_PollEvent(&e))
+        while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
             {
@@ -141,10 +141,7 @@ void Inspector::modifyInfoValue(const int p_x, const int p_y)
                 done = true;
                 break;
             }
-            if (e.type == SDL_TEXTINPUT)
-            {
-                userInput += e.text.text;
-            }
+            if (e.type == SDL_TEXTINPUT) { userInput += e.text.text; }
             else if (e.type == SDL_KEYDOWN)
             {
                 if (e.key.keysym.sym == SDLK_RETURN)
@@ -188,10 +185,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             m_entityPtr->setName(p_value);
             m_hierarchy->updateHierarchy();
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's X position")
     {
@@ -200,10 +194,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             m_entityPtr->setPosition(std::stof(p_value), m_entityPtr->getPosition().y);
             m_selectionRect.x = HIERARCHY_WIDTH + std::stof(p_value);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's Y position")
     {
@@ -212,21 +203,12 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             m_entityPtr->setPosition(m_entityPtr->getPosition().x, std::stof(p_value));
             m_selectionRect.y = std::stof(p_value);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }        
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's rotation")
     {
-        try
-        {
-            m_entityPtr->setRotation(std::stof(p_value));
-        }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }   
+        try { m_entityPtr->setRotation(std::stof(p_value)); }
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's X size")
     {
@@ -235,10 +217,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             m_entityPtr->setSize(std::stof(p_value), m_entityPtr->getSize().y);
             m_selectionRect.w = std::stof(p_value);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }   
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's Y size")
     {
@@ -247,10 +226,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             m_entityPtr->setSize(m_entityPtr->getSize().x, std::stof(p_value));
             m_selectionRect.h = std::stof(p_value);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }   
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Collider's X position")
     {
@@ -259,10 +235,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             Collider* collider = m_entityPtr->getCollider();
             collider->setPosition(collider->getColliderRect().x, std::stof(p_value));
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }   
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Collider's Y position")
     {
@@ -271,10 +244,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             Collider* collider = m_entityPtr->getCollider();
             collider->setPosition(std::stof(p_value), collider->getColliderRect().y);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        }   
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Collider's X size")
     {
@@ -283,10 +253,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             Collider* collider = m_entityPtr->getCollider();
             collider->setDimensions(collider->getColliderRect().w, std::stof(p_value));
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        } 
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Collider's Y size")
     {
@@ -295,10 +262,7 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
             Collider* collider = m_entityPtr->getCollider();
             collider->setDimensions(std::stof(p_value), collider->getColliderRect().h);
         }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        } 
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Is kinematic")
     {
@@ -307,31 +271,16 @@ void Inspector::assignModifiedValue(const std::string& p_infoName, const std::st
         else if (p_value == "false" || p_value == "0")
             m_entityPtr->setKinematic(false);
     }
-    else if (p_infoName == "Entity's texture")
-    {
-        m_entityPtr->setTexture(p_value.c_str());
-    }
+    else if (p_infoName == "Entity's texture") { m_entityPtr->setTexture(p_value.c_str()); }
     else if (p_infoName == "Entity's mass")
     {
-        try
-        {
-            reinterpret_cast<MoveableEntity*>(m_entityPtr)->setMass(std::stof(p_value));
-        }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        } 
+        try { reinterpret_cast<MoveableEntity*>(m_entityPtr)->setMass(std::stof(p_value)); }
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Entity's viscosity")
     {
-        try
-        {
-            reinterpret_cast<MoveableEntity*>(m_entityPtr)->setViscosity(std::stof(p_value));
-        }
-        catch (...)
-        {
-            std::cerr << "User didn't enter a floating value" << std::endl;
-        } 
+        try { reinterpret_cast<MoveableEntity*>(m_entityPtr)->setViscosity(std::stof(p_value)); }
+        catch (...) { std::cerr << "User didn't enter a floating value" << std::endl; }
     }
     else if (p_infoName == "Gravity reactive")
     {

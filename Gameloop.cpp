@@ -12,8 +12,8 @@ extern int g_sceneWidth;
 extern int g_sceneHeight;
 
 
-Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_Rect& p_sceneRect) :
-Gameloop(p_inputManager, p_renderer, p_sceneRect, nullptr)
+Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_Rect& p_sceneRect) : Gameloop(
+    p_inputManager, p_renderer, p_sceneRect, nullptr)
 {
 }
 
@@ -28,7 +28,7 @@ Gameloop::Gameloop(InputManager* p_inputManager, SDL_Renderer* p_renderer, SDL_R
 {
     m_entityManager = new EntityManager(m_renderer);
     m_fixedUpdateThread = std::thread([this]() { fixedUpdate(); });
-    
+
     chargeMyLevel();
     m_winSoundEffect = Mix_LoadWAV("./sounds/victory.mp3");
     m_threads.reserve(m_processor_count - 1);
@@ -56,10 +56,7 @@ void Gameloop::update()
     const auto player = m_entityManager->getPlayer();
     player->applyMovements(m_deltaTime);
     const auto collectibles = m_entityManager->getCollectibles();
-    for(auto* collectible : collectibles)
-    {
-        collectible->detectCollected(player->getCollider()->getColliderRect());
-    }
+    for (auto* collectible : collectibles) { collectible->detectCollected(player->getCollider()->getColliderRect()); }
     checkCollectibles();
 }
 
@@ -75,9 +72,9 @@ void Gameloop::fixedUpdate()
         //Optimisation on multiple threads to waste less time
         const float fixedUpdateTime = m_fixedUpdateTime.count() / 1000.f;
         const size_t max = std::min(moveableEntities.size(), m_processor_count - 1);
-        auto applyForceAndGravitySubset = [&moveableEntities, &fixedUpdateTime](int p_start, int p_end)
+        auto applyForceAndGravitySubset = [&moveableEntities, &fixedUpdateTime](const int p_start, const int p_end)
         {
-            for(int i = p_start; i < p_end; ++i)
+            for (int i = p_start; i < p_end; ++i)
             {
                 moveableEntities[i]->applyForces(fixedUpdateTime);
                 moveableEntities[i]->applyGravity(fixedUpdateTime);
@@ -85,15 +82,15 @@ void Gameloop::fixedUpdate()
         };
 
         const size_t entitiesPerThread = moveableEntities.size() / max;
-        for(size_t i = 0; i < max; ++i)
+        for (size_t i = 0; i < max; ++i)
         {
             m_threads.emplace_back(applyForceAndGravitySubset, i * entitiesPerThread, (i + 1) * entitiesPerThread);
         }
-        for(auto& thread : m_threads)
+        for (auto& thread : m_threads)
             thread.join();
         m_threads.clear();
         m_entityManager->solveInsidersEntities(fixedUpdateTime);
-        auto endTime  = std::chrono::steady_clock::now();
+        auto endTime = std::chrono::steady_clock::now();
         auto sleepTime = endTime - startTime;
         if (sleepTime > std::chrono::steady_clock::duration::zero())
             std::this_thread::sleep_until(startTime + m_fixedUpdateTime);
@@ -102,7 +99,8 @@ void Gameloop::fixedUpdate()
 
 SDL_Rect Gameloop::convertEntityRectToScene(const FRect& p_rect) const
 {
-    const SDL_Rect rect = { static_cast<int>(p_rect.x) + m_sceneRect.x,
+    const SDL_Rect rect = {
+        static_cast<int>(p_rect.x) + m_sceneRect.x,
         static_cast<int>(p_rect.y),
         static_cast<int>(p_rect.w),
         static_cast<int>(p_rect.h)
@@ -126,7 +124,7 @@ void Gameloop::draw() const
 void Gameloop::playGame()
 {
     m_playingGame = true;
-    
+
     m_sceneRect.x = g_scenePosX = 0;
     m_sceneRect.w = g_sceneWidth = SCREEN_WIDTH;
     m_sceneRect.h = g_sceneHeight = SCREEN_HEIGHT;
@@ -170,8 +168,8 @@ void Gameloop::checkCollectibles()
 {
     std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
     if (!std::all_of(collectibles.cbegin(), collectibles.cend(),
-        [](const Collectible* p_collectible) { return p_collectible->getIsCollected();}))
-            return;
+        [](const Collectible* p_collectible) { return p_collectible->getIsCollected(); }))
+        return;
     stopGame();
     //WIN
     Mix_PlayChannel(2, m_winSoundEffect, 0);
@@ -184,7 +182,7 @@ void Gameloop::chargeMyLevel() const
     m_entityManager->addEntity(BASE_TEXTURE, {10, 75, 100, 10});
     m_entityManager->addEntity(BASE_TEXTURE, {10, 150, 100, 10});
     m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 130, 20, 20});
-    
+
     m_entityManager->addEntity(BASE_TEXTURE, {10, 225, 100, 10});
     m_entityManager->addCollectible(BASE_COLLECTIBLE_TEXTURE, {50, 205, 20, 20});
     m_entityManager->addEntity(BASE_TEXTURE, {10, 300, 100, 10});

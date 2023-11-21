@@ -19,96 +19,96 @@ void InputManager::checkInput()
         case SDL_KEYDOWN:
             switch (m_event.key.keysym.sym)
             {
-                case SDLK_ESCAPE:
-                    *m_isPlaying = false;
-                    break;
-                case SDLK_z:
-                case SDLK_UP:
-                    m_controls[UP] = true;
-                    break;
-                case SDLK_d:
-                case SDLK_RIGHT:
-                    m_controls[RIGHT] = true;
-                    break;
-                case SDLK_q:
-                case SDLK_LEFT:
-                    m_controls[LEFT] = true;
-                    break;
-                case SDLK_e:
-                case SDLK_RETURN:
-                    m_controls[USE] = true;
-                    break;
-                case SDLK_DELETE:
-                case SDLK_BACKSPACE:
-                case SDLK_KP_BACKSPACE:
-                    m_controls[DELETE] = true;
+            case SDLK_ESCAPE:
+                *m_isPlaying = false;
                 break;
-                default:
-                    break;
+            case SDLK_z:
+            case SDLK_UP:
+                m_controls[UP] = true;
+                break;
+            case SDLK_d:
+            case SDLK_RIGHT:
+                m_controls[RIGHT] = true;
+                break;
+            case SDLK_q:
+            case SDLK_LEFT:
+                m_controls[LEFT] = true;
+                break;
+            case SDLK_e:
+            case SDLK_RETURN:
+                m_controls[USE] = true;
+                break;
+            case SDLK_DELETE:
+            case SDLK_BACKSPACE:
+            case SDLK_KP_BACKSPACE:
+                m_controls[DELETE] = true;
+                break;
+            default:
+                break;
             }
             break;
         case SDL_KEYUP:
             switch (m_event.key.keysym.sym)
             {
-                case SDLK_z:
-                case SDLK_UP:
-                    m_controls[UP] = false;
+            case SDLK_z:
+            case SDLK_UP:
+                m_controls[UP] = false;
                 break;
-                case SDLK_d:
-                case SDLK_RIGHT:
-                    m_controls[RIGHT] = false;
+            case SDLK_d:
+            case SDLK_RIGHT:
+                m_controls[RIGHT] = false;
                 break;
-                case SDLK_q:
-                case SDLK_LEFT:
-                    m_controls[LEFT] = false;
+            case SDLK_q:
+            case SDLK_LEFT:
+                m_controls[LEFT] = false;
                 break;
-                case SDLK_e:
-                case SDLK_RETURN:
-                    m_controls[USE] = false;
+            case SDLK_e:
+            case SDLK_RETURN:
+                m_controls[USE] = false;
                 break;
-                case SDLK_DELETE:
-                case SDLK_BACKSPACE:
-                case SDLK_KP_BACKSPACE:
-                    m_controls[DELETE] = false;
-                        break;
-                default: ;
+            case SDLK_DELETE:
+            case SDLK_BACKSPACE:
+            case SDLK_KP_BACKSPACE:
+                m_controls[DELETE] = false;
+                break;
+            default: ;
             }
-            case SDL_MOUSEBUTTONUP:
-                if (m_gameloop->getPlayingGame())
-                    break; 
-            break;
-            
-            case SDL_MOUSEBUTTONDOWN:
-                if (m_event.button.button == SDL_BUTTON_LEFT)
-                {
-                    const int mouseX = m_event.button.x;
-                    const int mouseY = m_event.button.y;
-                    if (!m_gameloop->getPlayingGame() && mouseX > g_scenePosX + g_sceneWidth)
-                    {
-                        m_inspector->modifyInfoValue(mouseX, mouseY);
-                        break;
-                    }
-
-                    if (!m_gameloop->getPlayingGame() && mouseX < g_scenePosX)
-                        if (m_hierarchy->detectClickedName(mouseX, mouseY))
-                            break;
-                    
-                    if (m_gameStateButtons->detectPressedButtons(mouseX, mouseY))
-                        break;
-                    
-                    if (mouseY > g_sceneHeight)
-                    {
-                        if (m_entityChooser->detectChosenEntity(mouseX, mouseY))
-                            break;
-                        //SOMETHING ELSE ?
-                        break;
-                    }
-                    Entity* entity = m_gameloop->getEntityFromPos(mouseX, mouseY);
-                    m_inspector->selectEntity(entity);
-                }
-            break;
-            default:
+        case SDL_MOUSEBUTTONUP:
+            if (m_gameloop->getPlayingGame())
                 break;
+            break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            if (m_event.button.button == SDL_BUTTON_LEFT)
+            {
+                const int mouseX = m_event.button.x;
+                const int mouseY = m_event.button.y;
+                if (!m_gameloop->getPlayingGame() && mouseX > g_scenePosX + g_sceneWidth)
+                {
+                    m_inspector->modifyInfoValue(mouseX, mouseY);
+                    break;
+                }
+
+                if (!m_gameloop->getPlayingGame() && mouseX < g_scenePosX)
+                    if (m_hierarchy->detectClickedName(mouseX, mouseY))
+                        break;
+
+                if (m_gameStateButtons->detectPressedButtons(mouseX, mouseY))
+                    break;
+
+                if (mouseY > g_sceneHeight)
+                {
+                    if (m_entityChooser->detectChosenEntity(mouseX, mouseY))
+                        break;
+                    //SOMETHING ELSE ?
+                    break;
+                }
+                Entity* entity = m_gameloop->getEntityFromPos(mouseX, mouseY);
+                m_inspector->selectEntity(entity);
+            }
+            break;
+        default:
+            break;
         }
     }
 }
@@ -125,7 +125,7 @@ void InputManager::sendControls()
         m_hierarchy->updateHierarchy();
         m_controls[DELETE] = false;
     }
-    
+
     if (!m_player)
         return;
 

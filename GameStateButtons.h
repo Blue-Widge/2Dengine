@@ -16,7 +16,7 @@ public:
 private:
     SDL_Renderer* m_renderer;
     Gameloop* m_gameLoop;
-    
+
     SDL_Texture* m_playTexture;
     SDL_Texture* m_pauseTexture;
     SDL_Texture* m_stopTexture;

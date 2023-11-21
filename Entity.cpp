@@ -46,10 +46,7 @@ void Entity::setSize(const float p_w, const float p_h)
     m_rect.h = p_h;
 }
 
-bool Entity::operator==(const Entity& p_entity) const
-{
-    return this->m_id == p_entity.m_id;
-}
+bool Entity::operator==(const Entity& p_entity) const { return this->m_id == p_entity.m_id; }
 
 void Entity::setTexture(const char* p_path)
 {
@@ -84,13 +81,13 @@ void Entity::updateBeforeDelete() const
     const std::vector<Entity*> staticEntities = m_entityManager->getStaticEntities();
     std::vector<Entity*> remainingEntities = {};
     std::vector<Entity*> remainingStaticEntities = {};
-    for(Entity* currEntity : entities)
+    for (Entity* currEntity : entities)
     {
         if (currEntity == this)
             continue;
         remainingEntities.emplace_back(currEntity);
     }
-    for(Entity* currStaticEntity : staticEntities)
+    for (Entity* currStaticEntity : staticEntities)
     {
         if (currStaticEntity == this)
             continue;
@@ -119,10 +116,7 @@ MoveableEntity::MoveableEntity(EntityManager* p_entityManager, const Uint16 p_id
     m_initialPos.y = m_rect.y = p_rect.y;
 }
 
-MoveableEntity::~MoveableEntity()
-{
-    Entity::~Entity();
-}
+MoveableEntity::~MoveableEntity() { Entity::~Entity(); }
 
 void MoveableEntity::setPosition(const float p_x, const float p_y)
 {
@@ -131,10 +125,7 @@ void MoveableEntity::setPosition(const float p_x, const float p_y)
     Entity::setPosition(p_x, p_y);
 }
 
-void MoveableEntity::setPositionKeepingInitialPos(const float p_x, const float p_y)
-{
-    Entity::setPosition(p_x, p_y);
-}
+void MoveableEntity::setPositionKeepingInitialPos(const float p_x, const float p_y) { Entity::setPosition(p_x, p_y); }
 
 void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const float p_deltaTime)
 {
@@ -157,8 +148,8 @@ void MoveableEntity::move(const Axis_e p_axis, const float p_moveSpeed, const fl
 
 void MoveableEntity::move(const float p_deltaTime)
 {
-    move(Axis_e::x, m_velocity.x, p_deltaTime);
-    move(Axis_e::y, m_velocity.y, p_deltaTime);
+    move(x, m_velocity.x, p_deltaTime);
+    move(y, m_velocity.y, p_deltaTime);
 }
 
 void MoveableEntity::rotate(const float p_rotationSpeed, const float p_deltaTime)
@@ -179,29 +170,29 @@ void MoveableEntity::applyForces(const float& p_deltaTime)
     const std::lock_guard<std::mutex> forceGuard(this->m_entityMutex);
 
     player->setXCounterSpeed(0.f);
-    for (MoveableEntity* otherEntity : m_entityManager->getMoveableEntities() )
+    for (MoveableEntity* otherEntity : m_entityManager->getMoveableEntities())
     {
         if (otherEntity == this || otherEntity == player)
             continue;
-        
+
         if (!collider->checkLeftCollisions(otherEntity, p_deltaTime) &&
             !collider->checkRightCollisions(otherEntity, p_deltaTime) &&
             !collider->checkUpperCollisions(otherEntity, p_deltaTime))
             continue;
-        
+
         const float otherEntityMass = otherEntity->getMass();
         Vec2<float> otherEntityVelocity = otherEntity->getVelocity();
         Vec2<float> relativeVelocity = otherEntityVelocity - m_velocity;
         if (std::abs(relativeVelocity.x) < 0.1f && std::abs(relativeVelocity.y) < 0.1f)
             continue;
-        
+
         Vec2<float> impulse = (m_mass * relativeVelocity + otherEntityMass * otherEntityVelocity) /
-                (m_mass + otherEntityMass);
+            (m_mass + otherEntityMass);
         if (this == player)
             player->setXCounterSpeed(impulse.x - 50.f);
         else
             applyForceTo(this, impulse);
-        
+
         applyForceTo(otherEntity, -1.f * impulse);
         move(p_deltaTime);
         otherEntity->move(p_deltaTime);
@@ -214,7 +205,7 @@ void MoveableEntity::updateBeforeDelete() const
     Entity::updateBeforeDelete();
     const std::vector<MoveableEntity*> moveableEntities = m_entityManager->getMoveableEntities();
     std::vector<MoveableEntity*> remainingMoveableEntities = {};
-    for(MoveableEntity* currMoveableEntity : moveableEntities)
+    for (MoveableEntity* currMoveableEntity : moveableEntities)
     {
         if (currMoveableEntity == this)
             continue;
@@ -244,7 +235,7 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
         const auto entities = m_entityManager->getEntities();
         const float gravityMovementThreshold = m_viscosity * gravity;
         const auto player = m_entityManager->getPlayer();
-        
+
         //CHECK COLLISION WITH OTHER ENTITIES
         for (const auto entity : entities)
         {
@@ -252,7 +243,7 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
                 continue;
 
             const std::lock_guard<std::mutex> collisionMutex(this->m_entityMutex);
-            
+
             if (m_isKinematic || entity->getIsKinematic() || !m_collider->checkGroundCollision(entity, p_deltaTime))
                 continue;
 
@@ -262,7 +253,7 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
                 player->setOnGround(true);
                 return;
             }
-            
+
             if (m_velocity.y > gravityMovementThreshold || m_velocity.y < -gravityMovementThreshold)
             {
                 if (typeid(*entity) == typeid(MoveableEntity))
@@ -279,7 +270,7 @@ void MoveableEntity::applyGravity(const float& p_deltaTime)
         if (this == player)
             player->setOnGround(false);
         m_velocity.y += gravityDeltaVelocity;
-        move(Axis_e::y, m_velocity.y, p_deltaTime);
+        move(y, m_velocity.y, p_deltaTime);
         m_collider->updatePosition();
     }
 }
@@ -306,7 +297,7 @@ Player* Player::getPlayerInstance(EntityManager* p_entityManager, const Uint16 p
         m_instance = new Player(p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity);
         return m_instance;
     }
-    
+
     return m_instance;
 }
 
@@ -320,7 +311,7 @@ Player::~Player()
 
 void Player::applyMovements(const float p_deltaTime)
 {
-    move(Axis_e::x, m_velocity.x - m_xCounterSpeed, p_deltaTime);
+    move(x, m_velocity.x - m_xCounterSpeed, p_deltaTime);
     m_collider->updatePosition();
 }
 
@@ -338,7 +329,7 @@ void Player::resetEntity()
 
 Player::Player(EntityManager* p_entityManager, Uint16 p_id, SDL_Renderer* p_renderer,
                const char* p_path, const FRect& p_rect, const float p_mass, const float p_viscosity) : MoveableEntity(
-                                                                                                           p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity), m_xCounterSpeed(0.f)
+    p_entityManager, p_id, p_renderer, p_path, p_rect, p_mass, p_viscosity), m_xCounterSpeed(0.f)
 {
     m_name = "Player";
     m_jumpSoundEffect = Mix_LoadWAV("./sounds/jump.mp3");
@@ -354,14 +345,14 @@ std::string Collectible::prepareEntityInfos() const
 {
     const std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
     unsigned short int count = 1;
-    for(const Collectible* collectible : collectibles)
+    for (const Collectible* collectible : collectibles)
     {
         if (collectible == this)
             break;
         count++;
     }
     std::string collectibleInfos = Entity::prepareEntityInfos() +
-            "Collectible N°" + to_string(count) + "/" + to_string(collectibles.size()) + "\n";
+        "Collectible N°" + to_string(count) + "/" + to_string(collectibles.size()) + "\n";
     return collectibleInfos;
 }
 
@@ -389,7 +380,7 @@ void Collectible::resetEntity()
 void Collectible::updateBeforeDelete() const
 {
     Entity::updateBeforeDelete();
-    
+
     const std::vector<Collectible*> collectibles = m_entityManager->getCollectibles();
     std::vector<Collectible*> remainingCollectibles = {};
     for (Collectible* currCollectible : collectibles)

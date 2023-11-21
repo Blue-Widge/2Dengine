@@ -2,10 +2,7 @@
 
 #include "Inspector.h"
 
-EntityManager::~EntityManager()
-{
-    deleteEntities();
-}
+EntityManager::~EntityManager() { deleteEntities(); }
 
 Entity* EntityManager::addEntity(const char* p_texturePath, const FRect& p_rect)
 {
@@ -61,7 +58,7 @@ void EntityManager::resetEntities() const
 {
     for (const auto entity : m_moveableEntities)
         entity->resetEntity();
-    
+
     for (const auto collectible : m_collectibles)
         collectible->resetEntity();
 }
@@ -101,14 +98,14 @@ void EntityManager::solveInsidersEntities(const float& p_deltaTime) const
             std::lock_guard<std::mutex> insidersLock(moveableEntityMutex);
 
             const float yOverlap = std::min(entityColliderRect.y + entityColliderRect.h - moveableEntityColliderRect.y,
-                                             moveableEntityColliderRect.y + moveableEntityColliderRect.h - entityColliderRect.y);
+                moveableEntityColliderRect.y + moveableEntityColliderRect.h - entityColliderRect.y);
 
             const float xOverlap = std::min(entityColliderRect.x + entityColliderRect.w - moveableEntityColliderRect.x,
-                                             moveableEntityColliderRect.x + moveableEntityColliderRect.w - entityColliderRect.x);
+                moveableEntityColliderRect.x + moveableEntityColliderRect.w - entityColliderRect.x);
 
-            if (xOverlap - g_epsilonValue <= 0  || yOverlap - g_epsilonValue <= 0)
+            if (xOverlap - g_epsilonValue <= 0 || yOverlap - g_epsilonValue <= 0)
                 continue;
-            
+
             const Vec2<float> moveableEntityVelocity = moveableEntity->getVelocity();
 
             if (std::abs(xOverlap) < std::abs(yOverlap))
@@ -118,19 +115,25 @@ void EntityManager::solveInsidersEntities(const float& p_deltaTime) const
                     xOverlap > -g_epsilonValue &&
                     moveableEntityCollider->checkLeftCollisions(entity, p_deltaTime))
                 {
-                    moveableEntity->setPositionKeepingInitialPos(entityColliderRect.x + entityColliderRect.w + g_epsilonValue,
-                    moveableEntityPosition.y);
-                    moveableEntity->setVelocity({-moveableEntityVelocity.x * moveableEntity->getViscosity(),
-                        -moveableEntityVelocity.y * moveableEntity->getViscosity()});
+                    moveableEntity->setPositionKeepingInitialPos(
+                        entityColliderRect.x + entityColliderRect.w + g_epsilonValue,
+                        moveableEntityPosition.y);
+                    moveableEntity->setVelocity({
+                        -moveableEntityVelocity.x * moveableEntity->getViscosity(),
+                        -moveableEntityVelocity.y * moveableEntity->getViscosity()
+                    });
                 }
                 else if (moveableEntityVelocity.x > g_epsilonValue &&
                     xOverlap > -g_epsilonValue &&
                     moveableEntityCollider->checkRightCollisions(entity, p_deltaTime))
                 {
-                    moveableEntity->setPositionKeepingInitialPos(entityColliderRect.x - moveableEntityColliderRect.w - g_epsilonValue,
-                    moveableEntityPosition.y);
-                    moveableEntity->setVelocity({-moveableEntityVelocity.x * moveableEntity->getViscosity(),
-                        -moveableEntityVelocity.y * moveableEntity->getViscosity()});
+                    moveableEntity->setPositionKeepingInitialPos(
+                        entityColliderRect.x - moveableEntityColliderRect.w - g_epsilonValue,
+                        moveableEntityPosition.y);
+                    moveableEntity->setVelocity({
+                        -moveableEntityVelocity.x * moveableEntity->getViscosity(),
+                        -moveableEntityVelocity.y * moveableEntity->getViscosity()
+                    });
                 }
             }
             else
@@ -141,17 +144,18 @@ void EntityManager::solveInsidersEntities(const float& p_deltaTime) const
                     moveableEntityCollider->checkUpperCollisions(entity, p_deltaTime))
                 {
                     moveableEntity->setPositionKeepingInitialPos(moveableEntityPosition.x,
-                    entityColliderRect.y + entityColliderRect.h + g_epsilonValue);
+                        entityColliderRect.y + entityColliderRect.h + g_epsilonValue);
                     moveableEntity->setVelocity({
                         moveableEntityVelocity.x * moveableEntity->getViscosity(),
-                        -moveableEntityVelocity.y * moveableEntity->getViscosity() });
+                        -moveableEntityVelocity.y * moveableEntity->getViscosity()
+                    });
                 }
                 else if (moveableEntityVelocity.y > g_epsilonValue &&
                     yOverlap > -g_epsilonValue &&
                     moveableEntityCollider->checkGroundCollision(entity, p_deltaTime))
                 {
                     moveableEntity->setPositionKeepingInitialPos(moveableEntityPosition.x,
-                    entityColliderRect.y - moveableEntityColliderRect.h - g_epsilonValue);
+                        entityColliderRect.y - moveableEntityColliderRect.h - g_epsilonValue);
                     //Already handled in gravity, should maybe change that
                 }
             }
