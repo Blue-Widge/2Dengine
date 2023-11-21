@@ -1,0 +1,499 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.37.32825.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/inspector.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "125c47951f439047afef10ccd94c5e46b5494b844af3ee0f175768a3e47f5b8a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/inspector.h"
+          },
+          "hashes": {
+            "sha-256": "12c75e70be669bacca7390ab8cf98465eb6fdb668ce09dd39c26e97f4f5d5457"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_rect.h"
+          },
+          "hashes": {
+            "sha-256": "6125a7519ab9fb241c6db0e2f2f93b381b53af6ac832d350e513ac7951db011e"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_stdinc.h"
+          },
+          "hashes": {
+            "sha-256": "6587504a8909a887a1e27b58aaa00e1f7eff2afe116139aa68fa84f08df037ef"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_config.h"
+          },
+          "hashes": {
+            "sha-256": "c9765cc67b5c0fb57ee1b2300fb4d14233ae224000eb0c8ff2de510002374fa3"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_platform.h"
+          },
+          "hashes": {
+            "sha-256": "c5285fab21df6f6b37fe67fdb98f879fd8cb3642c6f1087890fa78409dcff94b"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/begin_code.h"
+          },
+          "hashes": {
+            "sha-256": "fe969e8953208199ccba7cefd7dbc93dc49fa2c8142e5cff1eab2ddf6085d961"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/close_code.h"
+          },
+          "hashes": {
+            "sha-256": "26d80f6710a449d7f048d0e4045b06c3132c44ef99e69e46dadb6df886f5a8fd"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_error.h"
+          },
+          "hashes": {
+            "sha-256": "9902f0de492aad4f8c4e913f316c73861728b8bd0b489a38f0fee0b669c0208f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_pixels.h"
+          },
+          "hashes": {
+            "sha-256": "18a3726aa970ab382a9f060481e024fb88528f5d91d1f45b7f1f4ce8ae7e82a9"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_endian.h"
+          },
+          "hashes": {
+            "sha-256": "4acc77c1014bc0d7ff0f0dd7db54394e4915994f84e13041ba769c409a2725b2"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_rwops.h"
+          },
+          "hashes": {
+            "sha-256": "6da6f29147575d8b44e00811d91cb6a8166805eeeadf49cda586d93608f44ebe"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_render.h"
+          },
+          "hashes": {
+            "sha-256": "5a88ad3cc318db514105510ca6883fc5802712dd367be33e831d5ab69fff9345"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_video.h"
+          },
+          "hashes": {
+            "sha-256": "ff78e3667555086fcc92e959402e49787bf86074d43e62337e664c7741a736f8"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_surface.h"
+          },
+          "hashes": {
+            "sha-256": "f3e42fe8a86152c436d47f6ef1f565d58c457d5bc75a01e61331229eb51c78cc"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_blendmode.h"
+          },
+          "hashes": {
+            "sha-256": "e30085566ff36c2f7f77e28774e1ddbfc4518f8d66c6970d7b0cf79bbd348e2b"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_ttf.h"
+          },
+          "hashes": {
+            "sha-256": "26cfbc00d795c07d6e492c1360e3157e87dd4d5acd5f01e3f588f6b32f77fb24"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl.h"
+          },
+          "hashes": {
+            "sha-256": "fc8068904930eeff57176aa7607bbe4d9087727f53a3ab34758045cc7b20b022"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_main.h"
+          },
+          "hashes": {
+            "sha-256": "20bcc15b983b2325987cb84ed8318393df3092f1aa05598b027238c8691085a9"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_assert.h"
+          },
+          "hashes": {
+            "sha-256": "a6ecdeac4c6a27b2fa2f06faa21aa7cc67d671901baeff5f92b9b93df7527e3a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_atomic.h"
+          },
+          "hashes": {
+            "sha-256": "a9d79a7e8f442d9baf8bdf73cee82e11765f8a29d5e330385635095e9f8f7748"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_audio.h"
+          },
+          "hashes": {
+            "sha-256": "a771252b0513147226ae3ce89945fdf8803a25f0cedd92848ab91dd38cdf9fbe"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_mutex.h"
+          },
+          "hashes": {
+            "sha-256": "dca24dc26ffd9474821ff8ded6d2381b757a8761fe51eea9f42cdc428418740f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_thread.h"
+          },
+          "hashes": {
+            "sha-256": "ff69182673df1a547ea6a92a576fa9170222709a85f484dfccf3731cb1d4ef4b"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_clipboard.h"
+          },
+          "hashes": {
+            "sha-256": "3318b8c7066b19d7d178b892ea24ab168bb461ad4e42fa596cfe9d0fe7096945"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_cpuinfo.h"
+          },
+          "hashes": {
+            "sha-256": "71042ce1915dcc86ab9a38e552568f69af19993f3019284920fda334f3cd6828"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_events.h"
+          },
+          "hashes": {
+            "sha-256": "aa47978d6aabd08a727cf79e925dca8ab9b704384d5739198953556e04ad8f10"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_keyboard.h"
+          },
+          "hashes": {
+            "sha-256": "610608407a3490ca4c5b41f8eeb305915b0f9fb8df06c9ddf5feaa65c7b4395a"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_keycode.h"
+          },
+          "hashes": {
+            "sha-256": "d71e20c80f63ea61b9c7de2c9f7513fe45f25181c567a9e611b40ae836361d39"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_scancode.h"
+          },
+          "hashes": {
+            "sha-256": "a51c228101c76a10f2f8cdca0b7a3749cfa9be9df3a6aaf105577fbcb78a8f1c"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_mouse.h"
+          },
+          "hashes": {
+            "sha-256": "b8b9c1f3019ba79d011c54f994180622dd8706bc77642491f05cb4f60e0a4334"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_joystick.h"
+          },
+          "hashes": {
+            "sha-256": "a56e25f2d33ac73475bc5c1ff95f2837837f60ac6f48c5be781d6193f14df70d"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_guid.h"
+          },
+          "hashes": {
+            "sha-256": "ee2efcecb67ca44b8b300fd5732241f800bfc6a672a98d26ea2f769914356291"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_gamecontroller.h"
+          },
+          "hashes": {
+            "sha-256": "8e02c8a7db965aff90a572c0ea1c7bb35a073a3e8ca966a3081c9d9bee526e87"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_sensor.h"
+          },
+          "hashes": {
+            "sha-256": "36e22e54ab78f4de0d64cb46288b09089ea2f046c7b27051378b1af0219d8ac5"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_quit.h"
+          },
+          "hashes": {
+            "sha-256": "a5983431950d588660562669435ce247d3dae1d8bfd4716d967995243dcbbc75"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_gesture.h"
+          },
+          "hashes": {
+            "sha-256": "ffcb8759f40ef40d17ac88b801520ffec50afa85f776bbf42e4143336033b7f5"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_touch.h"
+          },
+          "hashes": {
+            "sha-256": "35ff32d4719c1cc5ab4b8196452e2677cf018c4fa2b9c6a4ad5ee6b97967e78f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_filesystem.h"
+          },
+          "hashes": {
+            "sha-256": "cceb309daae2fbe4f2dbd807fee16abd4699a306f496a0e47972eabc163c8bda"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_haptic.h"
+          },
+          "hashes": {
+            "sha-256": "40132ba84f48daa567272255813cb9def9f24f67d578a80c35adec11972277e3"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_hidapi.h"
+          },
+          "hashes": {
+            "sha-256": "3fa2deca31c6f04d00ad11e88d625b9bd9a6e33113a567cf49c37e0f2feb14ff"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_hints.h"
+          },
+          "hashes": {
+            "sha-256": "310912a94290400cb97038a69975e51faf82e84e91a6848f25de267fec071ed8"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_loadso.h"
+          },
+          "hashes": {
+            "sha-256": "db70ecd03b125395ea18bd3d96a767ef6335a67549db0dc79a29f2ef66b54c34"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_log.h"
+          },
+          "hashes": {
+            "sha-256": "ab1801cf70273b096b0eb707f633072649145bf5292c7779dc97cdeace03c2b6"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_messagebox.h"
+          },
+          "hashes": {
+            "sha-256": "ceb00dec779df365bbda82aec398381d56a68f0ac42c7cb909826af7cb591885"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_metal.h"
+          },
+          "hashes": {
+            "sha-256": "29b2be53f0b8e6af7e8bd1c16a683f02052f7231fe8b12c653d09f0986370528"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_power.h"
+          },
+          "hashes": {
+            "sha-256": "c21ce08d947708f14f38d304189b369c37390a8fac28e5e3b83e64efc35f2275"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_shape.h"
+          },
+          "hashes": {
+            "sha-256": "b2de3fbf5457477fc288fa8b2241bf7158955656245bc7bba749b775d1253b86"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_system.h"
+          },
+          "hashes": {
+            "sha-256": "e6f102541418e2bc677fec58bcac34312d8024cffd4a5628379ebaa5c87cc8f8"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_timer.h"
+          },
+          "hashes": {
+            "sha-256": "56c342e1f1c464d293d083c1ad37067ddb4c8859de873cbab80e84ca8b972155"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_version.h"
+          },
+          "hashes": {
+            "sha-256": "e1d97bfa1b0ea7e7e2872c758ddc798f79871783804d238de2aee60830793d2e"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_locale.h"
+          },
+          "hashes": {
+            "sha-256": "deb892f55679bedd7cf46f48e73da5f7062855b25cd8bf6a739a798e0fe5b2ea"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_misc.h"
+          },
+          "hashes": {
+            "sha-256": "3c6134ec29332731b8d98c47791ee20fe8ffdc82c04d23be0c3f41340f7bd973"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/gamestatebuttons.h"
+          },
+          "hashes": {
+            "sha-256": "4f49a752a37e16811cdb525cf6e89808c17110bd51eb185f46cc0dafb10ce097"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/packages/sdl2/include/sdl_image.h"
+          },
+          "hashes": {
+            "sha-256": "5496f1fcceec961b16c84af12d11036ca1d337788c10edfeeedf56895c89f46f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/gameloop.h"
+          },
+          "hashes": {
+            "sha-256": "3c3efd67d64169eb3e6f38bba22cdaf14aabf35914db24462f2baa16494f1f00"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/utils.h"
+          },
+          "hashes": {
+            "sha-256": "9b76843adeeb3c847da35d267493456233f87273599d4ae9286dc4a91057b225"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/entity.h"
+          },
+          "hashes": {
+            "sha-256": "e39debc39bc88293f8cd7be27e89e9c556e2482691ea472989892a2d03af0106"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/bluewidge/riderprojects/2dengine/collider.h"
+          },
+          "hashes": {
+            "sha-256": "f48a1ef4fdd369600b84e06fe10b1aba722fd97dd73dbdd344dbda88061143e5"
+          }
+        }
+      ]
+    }
+  ]
+}
